@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import pyrealsense2 as rs
 
-from folder.crawler_bot import config
+from crawler_bot import config
 
 
 class IntelRealSenseCamera(object):

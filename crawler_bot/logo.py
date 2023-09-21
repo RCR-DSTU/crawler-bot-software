@@ -3,9 +3,7 @@ import numpy as np
 
 from ultralytics import YOLO
 
-from folder.crawler_bot import config
-
-photo = 'media/StreetPhoto.jpg'
+from crawler_bot import config
 
 
 class Logo(object):
@@ -38,7 +36,7 @@ class LogoFollower(object):
         self.followerLogo = logo
         self.followerImage = image
         self.followerTarget = target
-        self.followerYOLOv8Model = YOLO('yolov8n.yaml').load('yolov8n.pt')
+        self.followerYOLOv8Model = YOLO('yolov8n.yaml').load('./crawler_bot/yolov8/yolov8n.pt')
 
     def detect_class(self, image):
         detections = []
@@ -119,7 +117,7 @@ class LogoFollowerController(object):
 
 
 def main():
-    image = cv2.imread(photo)
+    image = cv2.imread(config.test_image)
     logo_follower_controller = LogoFollowerController(image_shape=image.shape[:2])
     logo_follower_controller.control(image)
 

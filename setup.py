@@ -22,7 +22,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # 'logo_follower = common.logo_follower.node:main',
+            'crawler_bot_run = crawler_bot.node:main',
         ],
     },
 )

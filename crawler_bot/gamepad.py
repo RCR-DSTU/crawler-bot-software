@@ -1,7 +1,8 @@
 from threading import Thread
 from pyPS4Controller.controller import Controller
+from rclpy.parameter import Parameter
 
-from folder.crawler_bot import config
+from crawler_bot import config
 
 
 class Gamepad(Controller):
@@ -23,6 +24,12 @@ class Gamepad(Controller):
 
         self.threadListener = Thread(target=self.start_listening)
         self.threadListener.start()
+
+        self.switchOperatingMode = False
+        self.operatingModeParams = config.OperatingMode
+
+        self.switchCamera = False
+        self.cameraParams = config.use_camera
 
     def on_x_press(self):
         pass
@@ -73,13 +80,21 @@ class Gamepad(Controller):
         pass
 
     def on_up_arrow_press(self):
-        pass
+        mode = config.OperatingMode + 1
+        if mode > 2:
+            mode = 0
+        self.operatingModeParams = mode
+        self.switchOperatingMode = True
 
     def on_up_down_arrow_release(self):
         pass
 
     def on_down_arrow_press(self):
-        pass
+        mode = config.OperatingMode - 1
+        if mode < 0:
+            mode = 2
+        self.operatingModeParams = mode
+        self.switchOperatingMode = True
 
     def on_left_arrow_press(self):
         pass
@@ -149,7 +164,11 @@ class Gamepad(Controller):
         pass
 
     def on_share_press(self):
-        pass
+        if config.use_camera:
+            self.cameraParams = False
+        else:
+            self.cameraParams = True
+        self.switchCamera = True
 
     def on_share_release(self):
         pass

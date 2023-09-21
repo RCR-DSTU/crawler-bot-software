@@ -2,7 +2,7 @@ import cv2
 import realsense
 import numpy as np
 
-from folder.crawler_bot import config
+from crawler_bot import config
 
 
 class Painter(object):

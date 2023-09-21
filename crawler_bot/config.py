@@ -27,13 +27,19 @@ gamepad_interface = "/dev/input/js0"
 common_logger = logging.getLogger("LogoFollowerLogger")
 
 
+test_image = 'media/StreetPhoto.jpg'
+
+
+use_camera = False
+
+
 """
 3 Режима работы робота:
     1 - Режим отладки, работает только управление с компьютера через ROS2
     2 - Режим работы ручного управления, когда подключен геймпад
     3 - Автоматический режим работы
 """
-OperatingMode = 2
+OperatingMode = 0
 
 DEBUG = 0
 MANUAL = 1
