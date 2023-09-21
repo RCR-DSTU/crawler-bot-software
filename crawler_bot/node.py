@@ -1,3 +1,4 @@
+import cv2
 import rclpy
 
 from rclpy.node import Node
@@ -135,29 +136,33 @@ class LogoFollowerNode(Node):
         # Если по параметру нужно включить камеру, запускаем таймер ROS2, связанный с запуском камеры, если - нет,
         # то останавливаем таймер
         if config.use_camera:
-            self.cameraTimer.reset()
+            if self.cameraTimer.is_canceled():
+                self.cameraTimer.reset()
         else:
-            self.cameraTimer.cancel()
+            if self.cameraTimer.is_ready():
+                self.cameraTimer.cancel()
 
     def manual_timer_callback(self):
-        self.SpeedTwist.linear.x = self.Gamepad.linear_velocity
-        self.SpeedTwist.angular.z = self.Gamepad.angular_velocity
-        self.SpeedTwistPublisher.publish(self.SpeedTwist)
+        if self.Gamepad.is_connected:
+            self.SpeedTwist.linear.x = self.Gamepad.linear_velocity
+            self.SpeedTwist.angular.z = self.Gamepad.angular_velocity
+            self.SpeedTwistPublisher.publish(self.SpeedTwist)
+        else:
+            self.Logger.error(" Can not start manual control with gamepad! \n"
+                              " \tGamepad is disconnected!")
+            self.manualTimer.cancel()
 
     def camera_timer_callback(self):
         if self.camera is None:
             self.Logger.info("Trying to connect camera device...")
             self.camera = realsense.IntelRealSenseCameraD455()
-            self.autoTimer.reset()
         else:
-            if self.autoTimer.is_canceled():
-                self.autoTimer.reset()
             self.camera.read_frames()
 
     def auto_timer_callback(self):
         if config.use_camera:
             if self.camera is None:
-                self.autoTimer.cancel()
+                return
             else:
                 color_frame = self.camera.get_color_frame()
 
@@ -173,7 +178,6 @@ class LogoFollowerNode(Node):
             self.Logger.error(" The camera option is disabled! Enable the option to continue. \n"
                               " \tYou can turn it on using <ros2 param set /crawler_bot use_camera true>. \n"
                               " \tOr you can press <Share> button on gamepad.")
-            self.autoTimer.cancel()
 
     def debug_timer_callback(self):
 

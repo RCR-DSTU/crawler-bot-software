@@ -188,4 +188,4 @@ class Gamepad(Controller):
                          f" \tInterface: {config.gamepad_interface}")
 
     def start_listening(self):
-        self.listen(timeout=60)
+        self.listen(timeout=60, on_connect=self.connection_callback(), on_disconnect=self.disconnection_callback())
