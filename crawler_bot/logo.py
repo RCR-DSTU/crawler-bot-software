@@ -32,7 +32,7 @@ class LogoFollower(object):
     """
 
     def __init__(self, logo: Logo, target: tuple[int, int], image: np.ndarray = None):
-        self.Logger = config.common_logger
+        self.Logger = config.commonLogger
         self.followerLogo = logo
         self.followerImage = image
         self.followerTarget = target
@@ -89,7 +89,7 @@ class LogoFollowerController(object):
                  min_linear_velocity: float = -1.0,
                  min_angular_velocity: float = -1.0,
                  ):
-        self.Logger = config.common_logger
+        self.Logger = config.commonLogger
         self.logoFollower = LogoFollower(
             Logo("Логотип РЦР"),
             (int(image_shape[0] / 2), int(image_shape[1] / 2))
@@ -117,7 +117,7 @@ class LogoFollowerController(object):
 
 
 def main():
-    image = cv2.imread(config.test_image)
+    image = cv2.imread(config.testImagePath)
     logo_follower_controller = LogoFollowerController(image_shape=image.shape[:2])
     logo_follower_controller.control(image)
 

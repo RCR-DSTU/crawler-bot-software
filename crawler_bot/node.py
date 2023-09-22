@@ -11,9 +11,9 @@ class LogoFollowerNode(Node):
     def __init__(self, node_name: str):
         super().__init__(node_name)
 
-        self.Logger = config.common_logger
+        self.commonLogger = config.commonLogger
 
-        self.ModeSwitchFlag = True
+        self.modeSwitchFlag = True
         self.debugTimer = self.create_timer(timer_period_sec=1.,
                                             callback=self.debug_timer_callback)
 
@@ -41,19 +41,19 @@ class LogoFollowerNode(Node):
         self.declare_parameter('angular_velocity_y', 0.0)
         self.declare_parameter('angular_velocity_z', 0.0)
 
-        self.declare_parameter('operating_mode', config.OperatingMode)
-        self.declare_parameter('use_camera', config.use_camera)
+        self.declare_parameter('operating_mode', config.operatingMode)
+        self.declare_parameter('use_camera', config.usingCamera)
 
-        self.SpeedTwistPublisher = self.create_publisher(msg_type=Twist,
+        self.speedTwistPublisher = self.create_publisher(msg_type=Twist,
                                                          topic="/crawler_bot/twist",
                                                          qos_profile=10,
                                                          )
 
-        self.Gamepad = gamepad.Gamepad(interface=config.gamepad_interface, connecting_using_ds4drv=False)
+        self.controlGamepad = gamepad.Gamepad(interface=config.gamepadInterface, connecting_using_ds4drv=False)
         self.camera = None
         self.controller = None
 
-        self.SpeedTwist = Twist()
+        self.speedTwist = Twist()
 
     def control_timer_callback(self):
         """
@@ -61,81 +61,51 @@ class LogoFollowerNode(Node):
         :return:
         """
 
-        """Считываем параметр <operating_mode> из экосистемы ROS2, если на геймпаде произошло нажатие клавиши 
-        <Arrow_up> или <Arrow_down>, то в параметр экосистемы запишется новое значение, которое будет использовано 
-        программой в следующей итерации глобального цикла. Сообщаем экземпляру класса геймпада, что переключение с 
-        кнопки было учитано, обнуляя флаг switchOperatingMode."""
-
         # Считываем параметр <operating_mode> из экосистемы ROS2
-        config.OperatingMode = self.get_parameter('operating_mode').get_parameter_value().integer_value
-
-        # Проверяем нажатие кнопки переключения режима на геймпаде
-        if self.Gamepad.switchOperatingMode:
-            # Если кнопка нажималась, то меняем параметр режима на новый
-            self.set_parameters([rclpy.parameter.Parameter('operating_mode',
-                                                           rclpy.parameter.Parameter.Type.INTEGER,
-                                                           self.Gamepad.operatingModeParams)])
-            # Опускаем флажок переключения режима на геймпаде
-            self.Gamepad.switchOperatingMode = False
+        config.operatingMode = self.get_parameter('operating_mode').get_parameter_value().integer_value
 
         # По параметру режима работы определяем какой таймер активировать, а какие отключить
-        if config.OperatingMode == config.DEBUG:
+        if config.operatingMode == config.DEBUG:
             if self.manualTimer.is_canceled() and self.autoTimer.is_canceled():
-                if self.ModeSwitchFlag:
+                if self.modeSwitchFlag:
                     self.debugTimer.reset()
-                    self.ModeSwitchFlag = False
-                    self.Logger.info("Debug mode has been enabled")
+                    self.modeSwitchFlag = False
+                    self.commonLogger.info("Debug mode has been enabled")
             else:
                 self.manualTimer.cancel()
                 self.autoTimer.cancel()
-                self.Logger.info("Manual mode has been disabled")
-                self.Logger.info("Auto mode has been disabled")
-                self.ModeSwitchFlag = True
-        elif config.OperatingMode == config.MANUAL:
+                self.commonLogger.info("Manual mode has been disabled")
+                self.commonLogger.info("Auto mode has been disabled")
+                self.modeSwitchFlag = True
+        elif config.operatingMode == config.MANUAL:
             if self.debugTimer.is_canceled() and self.autoTimer.is_canceled():
-                if self.ModeSwitchFlag:
+                if self.modeSwitchFlag:
                     self.manualTimer.reset()
-                    self.ModeSwitchFlag = False
-                    self.Logger.info("Manual mode has been enabled")
+                    self.modeSwitchFlag = False
+                    self.commonLogger.info("Manual mode has been enabled")
             else:
                 self.debugTimer.cancel()
                 self.autoTimer.cancel()
-                self.ModeSwitchFlag = True
-                self.Logger.info("Debug mode has been disabled")
-                self.Logger.info("Auto mode has been disabled")
-        elif config.OperatingMode == config.AUTO:
+                self.modeSwitchFlag = True
+                self.commonLogger.info("Debug mode has been disabled")
+                self.commonLogger.info("Auto mode has been disabled")
+        elif config.operatingMode == config.AUTO:
             if self.debugTimer.is_canceled() and self.manualTimer.is_canceled():
-                if self.ModeSwitchFlag:
+                if self.modeSwitchFlag:
                     self.autoTimer.reset()
-                    self.ModeSwitchFlag = False
-                    self.Logger.info("Auto mode has been enabled")
+                    self.modeSwitchFlag = False
+                    self.commonLogger.info("Auto mode has been enabled")
             else:
                 self.debugTimer.cancel()
                 self.manualTimer.cancel()
-                self.ModeSwitchFlag = True
-                self.Logger.info("Debug mode has been disabled")
-                self.Logger.info("Manual mode has been disabled")
-
-        """Считываем параметр <use_camera> из экосистемы ROS2, если на геймпаде произошло нажатие клавиши <Share>, 
-        то в параметр экосистемы запишется новое значение, которое будет использовано программой в следующей итерации 
-        глобального цикла. Сообщаем экземпляру класса геймпада, что переключение с кнопки было учитано, обнуляя флаг 
-        switchCamera. Далее, если камера используется, то активируем таймер камеры."""
+                self.modeSwitchFlag = True
+                self.commonLogger.info("Debug mode has been disabled")
+                self.commonLogger.info("Manual mode has been disabled")
 
         # Считываем параметр <use_camera> из экосистемы ROS2
         config.use_camera = self.get_parameter('use_camera').get_parameter_value().bool_value
 
-        # Проверяем нажатие кнопки переключения камеры на геймпаде
-        if self.Gamepad.switchCamera:
-            # Если кнопка нажималась, то меняем параметр камеры на новый
-            self.set_parameters([rclpy.parameter.Parameter('use_camera',
-                                                           rclpy.parameter.Parameter.Type.BOOL,
-                                                           self.Gamepad.cameraParams)])
-            # Опускаем флажок переключения камеры на геймпаде
-            self.Gamepad.switchCamera = False
-
-        # Если по параметру нужно включить камеру, запускаем таймер ROS2, связанный с запуском камеры, если - нет,
-        # то останавливаем таймер
-        if config.use_camera:
+        if config.usingCamera:
             if self.cameraTimer.is_canceled():
                 self.cameraTimer.reset()
         else:
@@ -143,24 +113,24 @@ class LogoFollowerNode(Node):
                 self.cameraTimer.cancel()
 
     def manual_timer_callback(self):
-        if self.Gamepad.is_connected:
-            self.SpeedTwist.linear.x = self.Gamepad.linear_velocity
-            self.SpeedTwist.angular.z = self.Gamepad.angular_velocity
-            self.SpeedTwistPublisher.publish(self.SpeedTwist)
+        if self.controlGamepad.is_connected:
+            self.speedTwist.linear.x = self.controlGamepad.linear_velocity
+            self.speedTwist.angular.z = self.controlGamepad.angular_velocity
+            self.speedTwistPublisher.publish(self.speedTwist)
         else:
-            self.Logger.error(" Can not start manual control with gamepad! \n"
+            self.commonLogger.error(" Can not start manual control with gamepad! \n"
                               " \tGamepad is disconnected!")
             self.manualTimer.cancel()
 
     def camera_timer_callback(self):
         if self.camera is None:
-            self.Logger.info("Trying to connect camera device...")
+            self.commonLogger.info("Trying to connect camera device...")
             self.camera = realsense.IntelRealSenseCameraD455()
         else:
             self.camera.read_frames()
 
     def auto_timer_callback(self):
-        if config.use_camera:
+        if config.usingCamera:
             if self.camera is None:
                 return
             else:
@@ -171,11 +141,11 @@ class LogoFollowerNode(Node):
 
             linear_velocity, angular_velocity = self.controller.control(color_frame)
 
-            self.SpeedTwist.linear.x = linear_velocity
-            self.SpeedTwist.angular.z = angular_velocity
-            self.SpeedTwistPublisher.publish(self.SpeedTwist)
+            self.speedTwist.linear.x = linear_velocity
+            self.speedTwist.angular.z = angular_velocity
+            self.speedTwistPublisher.publish(self.speedTwist)
         else:
-            self.Logger.error(" The camera option is disabled! Enable the option to continue. \n"
+            self.commonLogger.error(" The camera option is disabled! Enable the option to continue. \n"
                               " \tYou can turn it on using <ros2 param set /crawler_bot use_camera true>. \n"
                               " \tOr you can press <Share> button on gamepad.")
 
@@ -188,45 +158,45 @@ class LogoFollowerNode(Node):
         a_y = self.get_parameter('angular_velocity_y').get_parameter_value().double_value
         a_z = self.get_parameter('angular_velocity_z').get_parameter_value().double_value
 
-        if self.SpeedTwist.linear.x != l_x:
-            self.Logger.info(f"Linear X Speed was change {self.SpeedTwist.linear.x} -> {l_x}")
-            self.SpeedTwist.linear.x = l_x
+        if self.speedTwist.linear.x != l_x:
+            self.commonLogger.info(f"Linear X Speed was change {self.speedTwist.linear.x} -> {l_x}")
+            self.speedTwist.linear.x = l_x
         else:
             pass
-        if self.SpeedTwist.linear.y != l_y:
-            self.Logger.info(f"Linear Y Speed was change {self.SpeedTwist.linear.y} -> {l_y}")
-            self.SpeedTwist.linear.y = l_y
+        if self.speedTwist.linear.y != l_y:
+            self.commonLogger.info(f"Linear Y Speed was change {self.speedTwist.linear.y} -> {l_y}")
+            self.speedTwist.linear.y = l_y
         else:
             pass
-        if self.SpeedTwist.linear.z != l_z:
-            self.Logger.info(f"Linear Z Speed was change {self.SpeedTwist.linear.z} -> {l_z}")
-            self.SpeedTwist.linear.z = l_z
+        if self.speedTwist.linear.z != l_z:
+            self.commonLogger.info(f"Linear Z Speed was change {self.speedTwist.linear.z} -> {l_z}")
+            self.speedTwist.linear.z = l_z
         else:
             pass
-        if self.SpeedTwist.angular.x != a_x:
-            self.Logger.info(f"Angular X Speed was change {self.SpeedTwist.angular.x} -> {a_x}")
-            self.SpeedTwist.angular.x = a_x
+        if self.speedTwist.angular.x != a_x:
+            self.commonLogger.info(f"Angular X Speed was change {self.speedTwist.angular.x} -> {a_x}")
+            self.speedTwist.angular.x = a_x
         else:
             pass
-        if self.SpeedTwist.angular.y != a_y:
-            self.Logger.info(f"Angular Y Speed was change {self.SpeedTwist.angular.y} -> {a_y}")
-            self.SpeedTwist.angular.y = a_y
+        if self.speedTwist.angular.y != a_y:
+            self.commonLogger.info(f"Angular Y Speed was change {self.speedTwist.angular.y} -> {a_y}")
+            self.speedTwist.angular.y = a_y
         else:
             pass
-        if self.SpeedTwist.angular.z != a_z:
-            self.Logger.info(f"Angular Z Speed was change {self.SpeedTwist.angular.z} -> {a_z}")
-            self.SpeedTwist.angular.z = a_z
+        if self.speedTwist.angular.z != a_z:
+            self.commonLogger.info(f"Angular Z Speed was change {self.speedTwist.angular.z} -> {a_z}")
+            self.speedTwist.angular.z = a_z
         else:
             pass
 
-        self.SpeedTwistPublisher.publish(self.SpeedTwist)
+        self.speedTwistPublisher.publish(self.speedTwist)
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = LogoFollowerNode("crawler_bot")
-    rclpy.spin(node)
-    node.destroy_node()
+    config.mainNode = LogoFollowerNode("crawler_bot")
+    rclpy.spin(config.mainNode)
+    config.mainNode.destroy_node()
     rclpy.shutdown()
 
 

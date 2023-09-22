@@ -14,22 +14,17 @@ class Gamepad(Controller):
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
 
-        self.Logger = config.common_logger
+        self.Logger = config.commonLogger
         self.Logger.info(" Gamepad initialization started.")
 
         self.linear_velocity = 0.
         self.angular_velocity = 0.
+        self.rosParameters = []
 
         self.ratio = 0.000030488
 
         self.threadListener = Thread(target=self.start_listening)
         self.threadListener.start()
-
-        self.switchOperatingMode = False
-        self.operatingModeParams = config.OperatingMode
-
-        self.switchCamera = False
-        self.cameraParams = config.use_camera
 
     def on_x_press(self):
         pass
@@ -80,21 +75,13 @@ class Gamepad(Controller):
         pass
 
     def on_up_arrow_press(self):
-        mode = config.OperatingMode + 1
-        if mode > 2:
-            mode = 0
-        self.operatingModeParams = mode
-        self.switchOperatingMode = True
+        self.rosParameters = [Parameter('operating_mode', Parameter.Type.INTEGER, 2)]
 
     def on_up_down_arrow_release(self):
         pass
 
     def on_down_arrow_press(self):
-        mode = config.OperatingMode - 1
-        if mode < 0:
-            mode = 2
-        self.operatingModeParams = mode
-        self.switchOperatingMode = True
+        self.rosParameters = [Parameter('operating_mode', Parameter.Type.INTEGER, 0)]
 
     def on_left_arrow_press(self):
         pass
@@ -164,11 +151,10 @@ class Gamepad(Controller):
         pass
 
     def on_share_press(self):
-        if config.use_camera:
-            self.cameraParams = False
+        if config.usingCamera:
+            self.rosParameters = [Parameter('use_camera', Parameter.Type.BOOL, False)]
         else:
-            self.cameraParams = True
-        self.switchCamera = True
+            self.rosParameters = [Parameter('use_camera', Parameter.Type.BOOL, True)]
 
     def on_share_release(self):
         pass
@@ -181,11 +167,11 @@ class Gamepad(Controller):
 
     def connection_callback(self):
         self.Logger.info(f" Gamepad connection established"
-                         f" \tInterface: {config.gamepad_interface}")
+                         f" \tInterface: {config.gamepadInterface}")
 
     def disconnection_callback(self):
         self.Logger.info(f" Gamepad connection lost!"
-                         f" \tInterface: {config.gamepad_interface}")
+                         f" \tInterface: {config.gamepadInterface}")
 
     def start_listening(self):
         self.listen(timeout=60, on_connect=self.connection_callback(), on_disconnect=self.disconnection_callback())

@@ -38,7 +38,7 @@ class IntelRealSenseCamera(object):
                  depth_enabled: bool = DepthEnabled,
                  ):
 
-        self.Logger = config.common_logger
+        self.Logger = config.commonLogger
 
         self.CameraDevice = None
         self.CameraPosition = camera_pos
