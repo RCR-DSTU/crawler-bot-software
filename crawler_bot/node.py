@@ -60,6 +60,9 @@ class LogoFollowerNode(Node):
         Функция, контролирующая все переключения в программе.
         :return:
         """
+        if self.controlGamepad.rosParameters:
+            self.set_parameters(self.controlGamepad.rosParameters)
+            self.controlGamepad.rosParameters.clear()
 
         # Считываем параметр <operating_mode> из экосистемы ROS2
         config.operatingMode = self.get_parameter('operating_mode').get_parameter_value().integer_value
@@ -103,7 +106,7 @@ class LogoFollowerNode(Node):
                 self.commonLogger.info("Manual mode has been disabled")
 
         # Считываем параметр <use_camera> из экосистемы ROS2
-        config.use_camera = self.get_parameter('use_camera').get_parameter_value().bool_value
+        config.usingCamera = self.get_parameter('use_camera').get_parameter_value().bool_value
 
         if config.usingCamera:
             if self.cameraTimer.is_canceled():
@@ -119,7 +122,7 @@ class LogoFollowerNode(Node):
             self.speedTwistPublisher.publish(self.speedTwist)
         else:
             self.commonLogger.error(" Can not start manual control with gamepad! \n"
-                              " \tGamepad is disconnected!")
+                                    " \tGamepad is disconnected!")
             self.manualTimer.cancel()
 
     def camera_timer_callback(self):
@@ -146,8 +149,8 @@ class LogoFollowerNode(Node):
             self.speedTwistPublisher.publish(self.speedTwist)
         else:
             self.commonLogger.error(" The camera option is disabled! Enable the option to continue. \n"
-                              " \tYou can turn it on using <ros2 param set /crawler_bot use_camera true>. \n"
-                              " \tOr you can press <Share> button on gamepad.")
+                                    " \tYou can turn it on using <ros2 param set /crawler_bot use_camera true>. \n"
+                                    " \tOr you can press <Share> button on gamepad.")
 
     def debug_timer_callback(self):
 
