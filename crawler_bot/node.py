@@ -14,6 +14,7 @@ class LogoFollowerNode(Node):
         self.commonLogger = config.commonLogger
 
         self.modeSwitchFlag = True
+
         self.debugTimer = self.create_timer(timer_period_sec=1.,
                                             callback=self.debug_timer_callback)
 
@@ -35,12 +36,7 @@ class LogoFollowerNode(Node):
                                               callback=self.control_timer_callback)
 
         self.declare_parameter('linear_velocity_x', 0.0)
-        self.declare_parameter('linear_velocity_y', 0.0)
-        self.declare_parameter('linear_velocity_z', 0.0)
-        self.declare_parameter('angular_velocity_x', 0.0)
-        self.declare_parameter('angular_velocity_y', 0.0)
         self.declare_parameter('angular_velocity_z', 0.0)
-
         self.declare_parameter('operating_mode', config.operatingMode)
         self.declare_parameter('use_camera', config.usingCamera)
 
@@ -50,8 +46,6 @@ class LogoFollowerNode(Node):
                                                          )
 
         self.controlGamepad = gamepad.Gamepad(interface=config.gamepadInterface, connecting_using_ds4drv=False)
-        self.camera = None
-        self.controller = None
 
         self.speedTwist = Twist()
 
@@ -114,6 +108,7 @@ class LogoFollowerNode(Node):
         else:
             if self.cameraTimer.is_ready():
                 self.cameraTimer.cancel()
+                self.commonLogger.info("Turn off camera")
 
     def manual_timer_callback(self):
         if self.controlGamepad.is_connected:
@@ -126,27 +121,12 @@ class LogoFollowerNode(Node):
             self.manualTimer.cancel()
 
     def camera_timer_callback(self):
-        if self.camera is None:
-            self.commonLogger.info("Trying to connect camera device...")
-            self.camera = realsense.IntelRealSenseCameraD455()
-        else:
-            self.camera.read_frames()
+        pass
 
     def auto_timer_callback(self):
         if config.usingCamera:
-            if self.camera is None:
-                return
-            else:
-                color_frame = self.camera.get_color_frame()
+            pass
 
-            if self.controller is None:
-                self.controller = logo.LogoFollowerController(color_frame.shape[:2])
-
-            linear_velocity, angular_velocity = self.controller.control(color_frame)
-
-            self.speedTwist.linear.x = linear_velocity
-            self.speedTwist.angular.z = angular_velocity
-            self.speedTwistPublisher.publish(self.speedTwist)
         else:
             self.commonLogger.error(" The camera option is disabled! Enable the option to continue. \n"
                                     " \tYou can turn it on using <ros2 param set /crawler_bot use_camera true>. \n"
@@ -155,35 +135,11 @@ class LogoFollowerNode(Node):
     def debug_timer_callback(self):
 
         l_x = self.get_parameter('linear_velocity_x').get_parameter_value().double_value
-        l_y = self.get_parameter('linear_velocity_y').get_parameter_value().double_value
-        l_z = self.get_parameter('linear_velocity_z').get_parameter_value().double_value
-        a_x = self.get_parameter('angular_velocity_x').get_parameter_value().double_value
-        a_y = self.get_parameter('angular_velocity_y').get_parameter_value().double_value
         a_z = self.get_parameter('angular_velocity_z').get_parameter_value().double_value
 
         if self.speedTwist.linear.x != l_x:
             self.commonLogger.info(f"Linear X Speed was change {self.speedTwist.linear.x} -> {l_x}")
             self.speedTwist.linear.x = l_x
-        else:
-            pass
-        if self.speedTwist.linear.y != l_y:
-            self.commonLogger.info(f"Linear Y Speed was change {self.speedTwist.linear.y} -> {l_y}")
-            self.speedTwist.linear.y = l_y
-        else:
-            pass
-        if self.speedTwist.linear.z != l_z:
-            self.commonLogger.info(f"Linear Z Speed was change {self.speedTwist.linear.z} -> {l_z}")
-            self.speedTwist.linear.z = l_z
-        else:
-            pass
-        if self.speedTwist.angular.x != a_x:
-            self.commonLogger.info(f"Angular X Speed was change {self.speedTwist.angular.x} -> {a_x}")
-            self.speedTwist.angular.x = a_x
-        else:
-            pass
-        if self.speedTwist.angular.y != a_y:
-            self.commonLogger.info(f"Angular Y Speed was change {self.speedTwist.angular.y} -> {a_y}")
-            self.speedTwist.angular.y = a_y
         else:
             pass
         if self.speedTwist.angular.z != a_z:
