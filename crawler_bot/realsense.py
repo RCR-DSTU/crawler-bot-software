@@ -40,76 +40,29 @@ class IntelRealSenseCamera(object):
 
         self.configLogger = config.commonLogger
 
-        self.cameraDevice = None
+        self.is_connected = False
+        self.currentFrames = None
+
+        self.cameraId = camera_id
         self.cameraPosition = camera_pos
         self.colorEnabled = color_enabled
         self.depthEnabled = depth_enabled
 
-        self.StreamProfile = None
-        self.Context = rs.context()
-        self.PipeLine = rs.pipeline()
-        self.StreamConfig = rs.config()
-        self.CurrentFrames = None
+        self.streamProfile = None
+        self.cameraConfig = rs.config()
+        self.cameraPipeline = rs.pipeline()
 
-        self.connect_device_by_id(camera_id)
-        self.start_streams()
+        self.connect_device_by_id()
 
-    def is_connected(self):
-        """
-        Проверка неправильная! Исправить! Проверять подключение нужного девайса!
-        :return:
-        """
-        if self.cameraDevice is None:
-            return False
-        else:
-            return True
-
-    def connect_device_by_id(self, camera_id: str):
-        while self.is_connected() is False:
-            if camera_id is None:
-                if self.find_rs_devices():
-                    if len(self.Context.devices) == 1:
-                        self.cameraDevice = self.Context.devices[0]
-                    else:
-                        while self.cameraDevice is None:
-
-                            num = input(f' Please choose device to connect from listed above: \n'
-                                        f' Enter the number: >> ')
-                            try:
-                                num = int(num)
-                            except Exception:
-                                self.configLogger.error(f" <{num}> is not integer!")
-                                time.sleep(0.5)
-                                print(" Try again.")
-                            try:
-                                self.cameraDevice = self.Context.devices[num]
-                                self.configLogger.info(
-                                    f" Device with index <{num}> | "
-                                    f"{self.cameraDevice.get_info(rs.camera_info.name)} | "
-                                    f"ID - {self.cameraDevice.get_info(rs.camera_info.serial_number)} was connected.")
-                            except Exception:
-                                self.configLogger.error(
-                                    f" Device with index <{num}> is not exist!")
-                                time.sleep(0.5)
-                                print(" Try again.")
-                else:
-                    self.configLogger.error(f" Please connect devices!")
-        else:
-            num = 0
-            for d in self.Context.devices:
-                if d.get_info(rs.camera_info.serial_number) == camera_id:
-                    self.cameraDevice = self.Context.devices[num]
-                    break
-                num += 1
-            if self.cameraDevice is None:
-                self.configLogger.error(f" Device with id <{camera_id}> is not exist. \n"
-                                        f" \tPlease correct device id!")
-        self.StreamConfig.enable_device(self.cameraDevice.get_info(rs.camera_info.serial_number))
+    def init_rs_instances(self):
+        self.streamProfile = None
+        self.cameraConfig = rs.config()
+        self.cameraPipeline = rs.pipeline()
 
     def find_rs_devices(self):
-        if len(self.Context.devices) > 0:
+        if len(rs.context().devices) > 0:
             num = 0
-            for d in self.Context.devices:
+            for d in rs.context().devices:
                 self.configLogger.info(f' Found IntelRealSense devices: \n '
                                        f' \t{num})'
                                        f' Model - {d.get_info(rs.camera_info.name)} |'
@@ -119,54 +72,88 @@ class IntelRealSenseCamera(object):
             self.configLogger.info(f" No IntelRealSense Device connected!")
             return False
 
+    def check_connection(self):
+        try:
+            for d in rs.context().devices:
+                if d.get_info(rs.camera_info.serial_number) == self.cameraId:
+                    return True
+            self.configLogger.error(f"Can not find camera device with ID: {self.cameraId}")
+            self.is_connected = False
+            self.init_rs_instances()
+            return False
+        except Exception:
+            self.configLogger.error(f"Camera was disconnected!")
+            self.is_connected = False
+            self.init_rs_instances()
+            return False
+
+    def connect_device_by_id(self):
+        len_devices = len(rs.context().devices)
+        if len_devices == 0:
+            self.configLogger.error("No connected camera devices!")
+            self.is_connected = False
+            return False
+        else:
+            if self.cameraId is None:
+                self.configLogger.warning(f"Camera ID is not specified. Trying to connect first available.")
+                self.cameraId = rs.context().devices[0].get_info(rs.camera_info.serial_number)
+                self.configLogger.info(f"Connected to Realsense Camera ID: {self.cameraId}")
+                self.is_connected = True
+                self.start_streams()
+                return True
+            else:
+                for d in rs.context().devices:
+                    if d.get_info(rs.camera_info.serial_number) == self.cameraId:
+                        self.is_connected = True
+                        self.start_streams()
+                        return True
+
     def start_streams(self):
         try:
+            self.cameraConfig.enable_device(self.cameraId)
             if self.colorEnabled:
-                self.StreamConfig.enable_stream(rs.stream.color,
+                self.cameraConfig.enable_stream(rs.stream.color,
                                                 self.CAMERA_WIDTH,
                                                 self.CAMERA_HEIGHT,
                                                 rs.format.bgr8, 30)
                 self.configLogger.info(f" Color stream enabled.")
             if self.depthEnabled:
-                self.StreamConfig.enable_stream(rs.stream.depth,
+                self.cameraConfig.enable_stream(rs.stream.depth,
                                                 self.CAMERA_WIDTH,
                                                 self.CAMERA_HEIGHT,
                                                 rs.format.z16, 30)
                 self.configLogger.info(" Depth stream enabled.")
-            self.StreamProfile = self.PipeLine.start(self.StreamConfig)
+            self.streamProfile = self.cameraPipeline.start(self.cameraConfig)
             self.configLogger.info(f" Streams was started.")
         except Exception:
             self.configLogger.info(f" Streams is already running. \n"
                                    f"     If you want to start another stream, "
                                    f"first finish all the current ones and restart with a new \n"
-                                   f"         Use class param <color_enabled> or/and <depth_enabled> when initialization")
+                                   f"         Use class param <color_enabled> or/and <depth_enabled> when "
+                                   f"initialization")
 
     def stop_all_stream(self):
-        self.StreamConfig.disable_all_streams()
+        self.cameraConfig.disable_all_streams()
         logging.info(f" Camera streams was stopped. \n"
                      "  Color and Depth stream disabled.")
 
     def read_frames(self):
-        if self.is_connected():
-            self.CurrentFrames = self.PipeLine.wait_for_frames()
-        else:
-            self.connect_device_by_id(None)
+        if self.check_connection():
+            if self.is_connected:
+                self.currentFrames = self.cameraPipeline.wait_for_frames()
+            else:
+                if self.connect_device_by_id():
+                    self.currentFrames = self.cameraPipeline.wait_for_frames()
 
     def get_color_frame(self):
-        if self.colorEnabled:
-            color_frame = self.CurrentFrames.get_color_frame()
-            color_image = np.asanyarray(color_frame.get_data())
-            return color_image
-        else:
-            self.configLogger.error(f" Can not get color frame. Color stream was disabled when initialization!")
+        color_frame = self.currentFrames.get_color_frame()
+        color_image = np.asanyarray(color_frame.get_data())
+        return color_image
 
     def get_depth_frame(self):
-        if self.depthEnabled:
-            depth_frame = self.CurrentFrames.get_depth_frame()
-            depth_image = np.asanyarray(depth_frame.get_data())
-            return depth_image
-        else:
-            self.configLogger.error(f" Can not get color frame. Color stream was disabled when initialization!")
+        depth_frame = self.currentFrames.get_depth_frame()
+        depth_image = np.asanyarray(depth_frame.get_data())
+        return depth_image
 
 
 class IntelRealSenseCameraD415(IntelRealSenseCamera):
