@@ -1,3 +1,5 @@
+import threading
+import time
 from threading import Thread
 from pyPS4Controller.controller import Controller
 from rclpy.parameter import Parameter
@@ -13,9 +15,10 @@ class Gamepad(Controller):
     """
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
+        time.sleep(2)
 
-        self.Logger = config.commonLogger
-        self.Logger.info(" Gamepad initialization started.")
+        self.commonLogger = config.commonLogger
+        self.commonLogger.info(" Gamepad initialization started.")
 
         self.linear_velocity = 0.
         self.angular_velocity = 0.
@@ -160,18 +163,13 @@ class Gamepad(Controller):
         pass
 
     def on_playstation_button_press(self):
-        pass
+        try:
+            config.mainNode.manualTimer.reset()
+        except Exception:
+            self.commonLogger.error("Can not reset timer in main node! Fatal!")
 
     def on_playstation_button_release(self):
         pass
 
-    def connection_callback(self):
-        self.Logger.info(f" Gamepad connection established"
-                         f" \tInterface: {config.gamepadInterface}")
-
-    def disconnection_callback(self):
-        self.Logger.info(f" Gamepad connection lost!"
-                         f" \tInterface: {config.gamepadInterface}")
-
     def start_listening(self):
-        self.listen(timeout=60, on_connect=self.connection_callback(), on_disconnect=self.disconnection_callback())
+        self.listen(timeout=500000)
