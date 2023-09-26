@@ -52,7 +52,7 @@ class LogoFollower(object):
         try:
             for d in detections:
                 cls = int(d.boxes.cls[0].item())
-                if cls == 1:
+                if cls == config.detectedClasses:
                     self.followerLogo.is_visible = True
                     return d
                 else:
@@ -66,8 +66,8 @@ class LogoFollower(object):
         if self.followerLogo.is_visible:
             coord = detected_class.boxes.data.tolist()[0][:4]
             self.followerLogo.set_logo_coord([int(i) for i in coord])
-            center = [int((self.followerLogo.logoP1[0] - self.followerLogo.logoP2[0]) / 2),
-                      int((self.followerLogo.logoP1[1] - self.followerLogo.logoP2[1]) / 2),
+            center = [int((self.followerLogo.logoP2[0] + self.followerLogo.logoP1[0]) / 2),
+                      int((self.followerLogo.logoP2[1] + self.followerLogo.logoP1[1]) / 2),
                       ]
             self.followerLogo.set_logo_center(center)
         else:
@@ -83,7 +83,7 @@ class LogoFollower(object):
 
 class LogoFollowerController(object):
     def __init__(self,
-                 image_shape: tuple[int],
+                 image_shape: tuple,
                  max_linear_velocity: float = 1.0,
                  max_angular_velocity: float = 1.0,
                  min_linear_velocity: float = -1.0,
@@ -108,8 +108,8 @@ class LogoFollowerController(object):
         self.logoFollower.detect_logo(image)
         d_x, d_y = self.logoFollower.calculate_deltas()
 
-        self.linearDelta = (d_y * (abs(self.maxLinearVelocity) + abs(self.minLinearVelocity))) / image.shape[1]
-        self.angularDelta = (d_x * (abs(self.maxAngularVelocity) + abs(self.minAngularVelocity))) / image.shape[0]
+        self.linearDelta = d_y / image.shape[1]
+        self.angularDelta = d_x / image.shape[0]
 
     def control(self, image):
         self.calculate_velocity_delta(image)
