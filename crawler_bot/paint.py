@@ -14,9 +14,9 @@ class Painter(object):
     BLACK_COLOR = (0, 0, 0)
 
     def __init__(self):
+        self.painterImage = None
         self.Logger = config.commonLogger
 
-        self.painterImage = None
         self.minimapSize = (10, 10)
         self.minimapRectangle = [0, 0, 0, 0]
 
@@ -36,6 +36,18 @@ class Painter(object):
 
         return self.painterImage
 
+    def draw_logo_target(self, image, logo):
+        image = cv2.rectangle(image, logo.logoP1, logo.logoP2, self.BLACK_COLOR, 2)
+        image = cv2.putText(image,
+                            logo.logoName,
+                            (logo.logoP1[0], logo.logoP1[1] - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            1,
+                            self.BLACK_COLOR
+                            )
+        image = cv2.drawMarker(image, logo.logoCenter, self.BLACK_COLOR, 0)
+        return image
+
     def refresh_image(self, image):
         image = np.array(image, np.uint8)
         self.painterImage = image
@@ -45,19 +57,3 @@ class Painter(object):
         self.minimapSize = (mw, mh)
         self.minimapRectangle = [10, image.shape[0] - mh - 10, 10 + mw, image.shape[0] - 10]
 
-
-camera = realsense.IntelRealSenseCameraD455()
-camera.read_frames()
-color_frame = camera.get_color_frame()
-
-painter = Painter()
-painter.refresh_image(color_frame)
-# painterImage = painter.draw_minimap(0, 0)
-
-while 1:
-    camera.read_frames()
-    color_frame = camera.get_color_frame()
-    painter.refresh_image(color_frame)
-    painterImage = painter.draw_minimap(0, 0)
-    cv2.imshow("Image", painterImage)
-    cv2.waitKey(1)

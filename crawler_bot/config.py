@@ -18,6 +18,13 @@ logging.basicConfig(level=logging.INFO,
                     )
 
 
+colorImageWidth = 1280
+colorImageHeight = 720
+
+
+detectedClasses = 0
+
+
 # Ниже определены 3 режима работы робота:
 #     0 - (DEBUG) Режим отладки, работает только управление с компьютера через ROS2
 #     1 - (MANUAL) Режим работы ручного управления, когда подключен геймпад
