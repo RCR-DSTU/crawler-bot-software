@@ -149,7 +149,9 @@ class LogoFollowerNode(Node):
             self.speedTwistPublisher.publish(self.speedTwist)
         else:
             self.commonLogger.error(" Can not start manual control with gamepad! Gamepad is disconnected!")
-            self.controlGamepad = gamepad.Gamepad(interface=config.gamepadInterface, connecting_using_ds4drv=False)
+            self.controlGamepad = gamepad.Gamepad(timeout=5000000,
+                                                  interface=config.gamepadInterface,
+                                                  connecting_using_ds4drv=False)
             self.manualTimer.cancel()
 
     def auto_timer_callback(self):
@@ -177,7 +179,8 @@ class LogoFollowerNode(Node):
         if config.usingCamera:
             targeted_image = self.imagePainter.draw_logo_target(self.colorImage,
                                                                 self.logoController.logoFollower.followerLogo)
-            cv2.imshow("Image", targeted_image)
+            map_image = self.imagePainter.draw_minimap(targeted_image)
+            cv2.imshow("Image", map_image)
             cv2.waitKey(1)
 
     def camera_color_callback(self, msg):

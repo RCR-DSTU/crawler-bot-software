@@ -13,8 +13,9 @@ class Gamepad(Controller):
     ручном режиме. Работа слушателя осуществляется в параллельном потоке все время существования экземпляра после
     инициализации.
     """
-    def __init__(self, **kwargs):
+    def __init__(self, timeout: int = 1, **kwargs):
         Controller.__init__(self, **kwargs)
+        self.timeOut = timeout
         time.sleep(2)
 
         self.commonLogger = config.commonLogger
@@ -172,4 +173,4 @@ class Gamepad(Controller):
         pass
 
     def start_listening(self):
-        self.listen(timeout=500000)
+        self.listen(timeout=self.timeOut)
