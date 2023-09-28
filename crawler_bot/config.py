@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from ament_index_python import get_package_prefix
 
 # Параметры логгирования всех скриптов в пакете
 loggingLevel = logging.INFO
@@ -22,9 +23,6 @@ colorImageWidth = 1280
 colorImageHeight = 720
 
 
-detectedClasses = 0
-
-
 # Ниже определены 3 режима работы робота:
 #     0 - (DEBUG) Режим отладки, работает только управление с компьютера через ROS2
 #     1 - (MANUAL) Режим работы ручного управления, когда подключен геймпад
@@ -34,6 +32,12 @@ MANUAL = 1
 AUTO = 2
 
 
+# Класс объектов, которые необходимо отслеживать
+detectingClass = 0
+# Тип YOLOV8 модели нейронной сети
+nnModel = 'yolov8n.yaml'
+# Путь к весам нейронной сети
+nnPath = f"{get_package_prefix('crawler_bot')}/share/crawler_bot/yolov8/model.pt"
 # Основной логгер для всех скриптов в пакете
 commonLogger = logging.getLogger("LogoFollowerLogger")
 # Интерфейс подключения геймпада

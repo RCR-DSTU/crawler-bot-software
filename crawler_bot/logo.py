@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 from ultralytics import YOLO
+from ament_index_python import get_package_prefix
 
 from crawler_bot import config
 
@@ -36,7 +37,7 @@ class LogoFollower(object):
         self.followerLogo = logo
         self.followerImage = image
         self.followerTarget = target
-        self.followerYOLOv8Model = YOLO('yolov8n.yaml').load('./crawler_bot/yolov8/yolov8n.pt')
+        self.followerYOLOv8Model = YOLO(config.nnPath).load(config.nnPath)
 
     def detect_class(self, image):
         detections = []
