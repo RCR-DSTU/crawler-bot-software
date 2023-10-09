@@ -53,7 +53,7 @@ class LogoFollower(object):
         try:
             for d in detections:
                 cls = int(d.boxes.cls[0].item())
-                if cls == config.detectedClasses:
+                if cls == config.detectingClass:
                     self.followerLogo.is_visible = True
                     return d
                 else:
@@ -77,7 +77,7 @@ class LogoFollower(object):
 
     def calculate_deltas(self):
         delta_x = self.followerLogo.logoCenter[0] - self.followerTarget[0]
-        delta_y = self.followerLogo.logoCenter[1] - self.followerTarget[1]
+        delta_y = -3 * (self.followerLogo.logoCenter[1] - self.followerTarget[1])
 
         return delta_x, delta_y
 
@@ -92,7 +92,7 @@ class LogoFollowerController(object):
                  ):
         self.Logger = config.commonLogger
         self.logoFollower = LogoFollower(
-            Logo("Логотип РЦР"),
+            Logo("RCR Logo"),
             (int(image_shape[0] / 2), int(image_shape[1] / 2))
         )
         self.followerImageShape = image_shape

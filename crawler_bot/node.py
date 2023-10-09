@@ -1,5 +1,3 @@
-import time
-
 import cv2
 import rclpy
 
@@ -44,7 +42,7 @@ class LogoFollowerNode(Node):
         self.declare_parameter('use_camera', config.usingCamera)
 
         self.speedTwistPublisher = self.create_publisher(msg_type=Twist,
-                                                         topic="/crawler_bot/twist",
+                                                         topic="/CrawlerBot/twist",
                                                          qos_profile=10,
                                                          )
         self.cvBridge = CvBridge()
@@ -163,6 +161,10 @@ class LogoFollowerNode(Node):
         if config.usingCamera:
             try:
                 self.logoController.calculate_velocity_delta(self.colorImage)
+                msg = Twist()
+                msg.linear.x = self.logoController.linearDelta
+                msg.angular.z = self.logoController.angularDelta
+                self.speedTwistPublisher.publish(msg)
                 self.commonLogger.info(f" Twist velocities: \n "
                                        f" \t x: {self.logoController.linearDelta} "
                                        f" alpha: {self.logoController.angularDelta}")
@@ -177,10 +179,13 @@ class LogoFollowerNode(Node):
 
     def camera_timer_callback(self):
         if config.usingCamera:
-            targeted_image = self.imagePainter.draw_logo_target(self.colorImage,
-                                                                self.logoController.logoFollower.followerLogo)
-            map_image = self.imagePainter.draw_minimap(targeted_image)
-            cv2.imshow("Image", map_image)
+            if self.logoController.logoFollower.followerLogo.is_visible:
+                targeted_image = self.imagePainter.draw_logo_target(self.colorImage,
+                                                                    self.logoController.logoFollower.followerLogo)
+                map_image = self.imagePainter.draw_minimap(targeted_image)
+            else:
+                map_image = self.colorImage
+            cv2.imshow("Image", cv2.cvtColor(map_image, cv2.COLOR_BGR2RGB))
             cv2.waitKey(1)
 
     def camera_color_callback(self, msg):
