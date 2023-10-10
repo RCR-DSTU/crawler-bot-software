@@ -76,8 +76,8 @@ class LogoFollower(object):
                                 f" \t Using last coordinates to find logo...")
 
     def calculate_deltas(self):
-        delta_x = self.followerLogo.logoCenter[0] - self.followerTarget[0]
-        delta_y = -3 * (self.followerLogo.logoCenter[1] - self.followerTarget[1])
+        delta_x = (self.followerLogo.logoCenter[0] - self.followerTarget[0])
+        delta_y = (self.followerLogo.logoCenter[1] - self.followerTarget[1])
 
         return delta_x, delta_y
 
@@ -102,6 +102,9 @@ class LogoFollowerController(object):
         self.minLinearVelocity = min_linear_velocity
         self.minAngularVelocity = min_angular_velocity
 
+        self.pLinearRatio = -1.
+        self.pAngularRatio = -2.
+
         self.linearDelta = 0.0
         self.angularDelta = 0.0
 
@@ -109,8 +112,8 @@ class LogoFollowerController(object):
         self.logoFollower.detect_logo(image)
         d_x, d_y = self.logoFollower.calculate_deltas()
 
-        self.linearDelta = d_y / image.shape[1]
-        self.angularDelta = d_x / image.shape[0]
+        self.linearDelta = d_y / image.shape[1] * self.pLinearRatio
+        self.angularDelta = d_x / image.shape[0] * self.pAngularRatio
 
     def control(self, image):
         self.calculate_velocity_delta(image)

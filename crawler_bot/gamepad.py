@@ -61,10 +61,10 @@ class Gamepad(Controller):
         pass
 
     def on_L2_press(self, value):
-        pass
+        self.linear_velocity = -(0.5 - (- value) * self.ratio * 0.5)
 
     def on_L2_release(self):
-        pass
+        self.linear_velocity = 0.
 
     def on_R1_press(self):
         pass
@@ -73,9 +73,10 @@ class Gamepad(Controller):
         pass
 
     def on_R2_press(self, value):
-        pass
+        self.linear_velocity = 0.5 - (- value) * self.ratio * 0.5
 
     def on_R2_release(self):
+        self.linear_velocity = 0.
         pass
 
     def on_up_arrow_press(self):
@@ -98,11 +99,13 @@ class Gamepad(Controller):
 
     def on_R3_up(self, value):
         # Значения меняются от 0 до -32800
-        self.linear_velocity = (- value) * self.ratio
+        # self.linear_velocity = (- value) * self.ratio
+        pass
 
     def on_R3_down(self, value):
         # Значения меняются от 0 до 32800
-        self.linear_velocity = (- value) * self.ratio
+        # self.linear_velocity = (- value) * self.ratio
+        pass
 
     def on_R3_left(self, value):
         # Значения меняются от 0 до -32800
