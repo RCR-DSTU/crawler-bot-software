@@ -7,7 +7,7 @@ nnPath = f"{get_package_prefix('crawler_bot')}/lib/python3.10/site-packages/craw
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
@@ -23,7 +23,7 @@ setup(
     entry_points={
         'console_scripts': [
             'crawler_bot_run = crawler_bot.node:main',
-            'realsense_run = crawler_bot.node2:main'
+            'realsense_run = crawler_bot.realsense:main'
         ],
     },
 )
