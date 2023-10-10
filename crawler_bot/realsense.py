@@ -1,8 +1,10 @@
 import rclpy
+import config
 import numpy as np
 import pyrealsense2 as rs
 from rclpy.node import Node
 from cv_bridge import CvBridge
+from ultralytics import YOLO
 from sensor_msgs.msg import Image
 
 
@@ -18,8 +20,10 @@ class RealsenseNode(Node):
         self.profile = None
         self.cvBridge = CvBridge()
 
-        self.config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
-        self.config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 30)
+        self.YOLOv8Model = YOLO(config.nnPath).load(config.nnPath)
+
+        self.config.enable_stream(rs.stream.color, config.imageWidth, config.imageHeight, rs.format.bgr8, 30)
+        self.config.enable_stream(rs.stream.depth, config.imageWidth, config.imageHeight, rs.format.z16, 30)
 
         self.profile = self.pipeline.start()
 
@@ -33,8 +37,21 @@ class RealsenseNode(Node):
         self.colorPublisher.publish(self.cvBridge.cv2_to_imgmsg(color_image))
         self.depthPublisher.publish(self.cvBridge.cv2_to_imgmsg(depth_image))
 
+        detected_class = self.detect_class(color_image)
+
         self.get_logger().info(f"Timer tick: {self.get_clock().now().to_msg()}")
 
+    def detect_class(self, image):
+        detections = self.YOLOv8Model.predict(image)[0]
+        try:
+            for d in detections:
+                cls = int(d.boxes.cls[0].item())
+                if cls == config.detectingClass:
+                    return d
+                else:
+                    return None
+        except Exception:
+            pass
 
 def main():
     rclpy.init()

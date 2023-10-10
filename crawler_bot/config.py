@@ -19,8 +19,8 @@ logging.basicConfig(level=logging.INFO,
                     )
 
 
-colorImageWidth = 1280
-colorImageHeight = 720
+imageWidth = 1280
+imageHeight = 720
 
 
 # Ниже определены 3 режима работы робота:
