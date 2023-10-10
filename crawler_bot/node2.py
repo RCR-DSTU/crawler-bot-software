@@ -36,9 +36,9 @@ class RealsenseNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    config.mainNode = RealsenseNode("realsense")
-    rclpy.spin(config.mainNode)
-    config.mainNode.destroy_node()
+    config.realsenseNode = RealsenseNode("realsense")
+    rclpy.spin(config.realsenseNode)
+    config.realsenseNode.destroy_node()
     rclpy.shutdown()
 
 
