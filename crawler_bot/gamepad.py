@@ -1,4 +1,3 @@
-import threading
 import time
 from threading import Thread
 from pyPS4Controller.controller import Controller
@@ -17,9 +16,6 @@ class Gamepad(Controller):
         Controller.__init__(self, **kwargs)
         self.timeOut = timeout
         time.sleep(2)
-
-        self.commonLogger = config.commonLogger
-        self.commonLogger.info(" Gamepad initialization started.")
 
         self.linear_velocity = 0.
         self.angular_velocity = 0.
@@ -170,7 +166,7 @@ class Gamepad(Controller):
         try:
             config.mainNode.manualTimer.reset()
         except Exception:
-            self.commonLogger.error("Can not reset timer in main node! Fatal!")
+            pass
 
     def on_playstation_button_release(self):
         pass

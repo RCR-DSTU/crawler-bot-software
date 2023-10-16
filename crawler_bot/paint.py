@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 
-from crawler_bot import config
-
 
 class Painter(object):
     MINIMAP_SCALE = 0.5
@@ -13,7 +11,6 @@ class Painter(object):
 
     def __init__(self):
         self.painterImage = None
-        self.Logger = config.commonLogger
 
         self.minimapSize = (10, 10)
         self.minimapRectangle = [0, 0, 0, 0]
@@ -34,16 +31,9 @@ class Painter(object):
         self.painterImage = image
         return self.painterImage
 
-    def draw_logo_target(self, image, logo):
-        image = cv2.rectangle(image, logo.logoP1, logo.logoP2, self.BLACK_COLOR, 5)
-        image = cv2.putText(image,
-                            logo.logoName,
-                            (logo.logoP1[0], logo.logoP1[1] - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            1,
-                            self.BLACK_COLOR
-                            )
-        image = cv2.drawMarker(image, logo.logoCenter, self.BLACK_COLOR, 0)
+    def draw_logo_target(self, image, target):
+        t = (target.x, target.y)
+        image = cv2.drawMarker(image, t, self.BLACK_COLOR, 0)
         return image
 
     def refresh_image(self, image):

@@ -1,22 +1,4 @@
-import datetime
-import logging
-
 from ament_index_python import get_package_prefix
-
-# Параметры логгирования всех скриптов в пакете
-loggingLevel = logging.INFO
-loggingFormat = '%(asctime)s %(levelname)s: %(module)s->%(funcName)s:%(message)s'
-loggingTime = str(datetime.datetime.now()).split(':')[:2]
-
-
-loggingHandlers = [  # logging.FileHandler(f"./logs/logo_follower_{':'.join(logging_time)}.log", mode="w"),
-    logging.StreamHandler(),
-]
-
-logging.basicConfig(level=logging.INFO,
-                    handlers=loggingHandlers,
-                    format=loggingFormat,
-                    )
 
 
 imageWidth = 1280
@@ -37,20 +19,21 @@ detectingClass = 0
 # Тип YOLOV8 модели нейронной сети
 nnModel = 'yolov8n.yaml'
 # Путь к весам нейронной сети
-nnPath = f"{get_package_prefix('crawler_bot')}/share/crawler_bot/yolov8/model.pt"
-# Основной логгер для всех скриптов в пакете
-commonLogger = logging.getLogger("LogoFollowerLogger")
+# nnPath = f"{get_package_prefix('crawler_bot')}/share/crawler_bot/yolov8/model.pt"
+nnPath = f"{get_package_prefix('crawler_bot')}/lib/python3.10/site-packages/crawler_bot/yolov8/model.pt"
 # Интерфейс подключения геймпада
 gamepadInterface = "/dev/input/js0"
 # Картинка для тестирования модуля распознавания
 testImagePath = 'media/StreetPhoto.jpg'
 # Переменная, хранящая текущий режим работы из параметров
-operatingMode = MANUAL
+operatingMode = DEBUG
 # Флаг испльзования камеры
 usingCamera = False
 # Пустая переменная для экземпляра ноды, чтобы можно было использовать ноду из всех скриптов, к которым подлючен
 # этот файл
 mainNode = None
-realsenseNode = None
+# Период таймера всех РОС2 таймеров (20 раз в секунду)
+TIMER_PERIOD = 0.05
+
 
 

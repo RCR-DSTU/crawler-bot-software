@@ -23,7 +23,7 @@ setup(
     entry_points={
         'console_scripts': [
             'crawler_bot_run = crawler_bot.node:main',
-            'realsense_run = crawler_bot.realsense:main'
+            'realsense_run = crawler_bot.realsense:main',
         ],
     },
 )

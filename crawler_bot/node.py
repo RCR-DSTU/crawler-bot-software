@@ -3,66 +3,64 @@ import rclpy
 
 from cv_bridge import CvBridge
 from rclpy.node import Node
-from rclpy.parameter import Parameter
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Image
+from geometry_msgs.msg import Twist, Point
+from sensor_msgs.msg import CompressedImage
 
-from crawler_bot import realsense, gamepad, config, logo, paint
+from crawler_bot import gamepad, config, paint
 
 
 class LogoFollowerNode(Node):
     def __init__(self, node_name: str):
         super().__init__(node_name)
 
-        self.commonLogger = config.commonLogger
-
+        self.commonLogger = self.get_logger()
         self.modeSwitchFlag = True
-
-        self.debugTimer = self.create_timer(timer_period_sec=1.,
+        self.debugTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
                                             callback=self.debug_timer_callback)
-
-        self.manualTimer = self.create_timer(timer_period_sec=0.05,
+        self.manualTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
                                              callback=self.manual_timer_callback)
-
-        self.autoTimer = self.create_timer(1.,
+        self.autoTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
                                            callback=self.auto_timer_callback)
-        self.cameraTimer = self.create_timer(0.033,
+        self.cameraTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
                                              callback=self.camera_timer_callback)
-
+        self.controlTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
+                                              callback=self.control_timer_callback)
         self.debugTimer.cancel()
         self.manualTimer.cancel()
         self.autoTimer.cancel()
-
-        self.controlTimer = self.create_timer(1.,
-                                              callback=self.control_timer_callback)
-
         self.declare_parameter('linear_velocity_x', 0.0)
         self.declare_parameter('angular_velocity_z', 0.0)
         self.declare_parameter('operating_mode', config.operatingMode)
         self.declare_parameter('use_camera', config.usingCamera)
-
         self.speedTwistPublisher = self.create_publisher(msg_type=Twist,
                                                          topic="/CrawlerBot/twist",
                                                          qos_profile=10,
                                                          )
         self.cvBridge = CvBridge()
+        self.cameraTarget = Point()
         self.colorImage = None
         self.depthImage = None
-        self.colorImageSubscription = self.create_subscription(msg_type=Image,
-                                                               topic="/camera/color/image_raw",
+        self.cameraVelocity = None
+        self.colorImageSubscription = self.create_subscription(msg_type=CompressedImage,
+                                                               topic="/color_image",
                                                                callback=self.camera_color_callback,
                                                                qos_profile=10,
                                                                )
-        self.depthImageSubscription = self.create_subscription(msg_type=Image,
-                                                               topic="/camera/depth/image_rect_raw",
+        self.depthImageSubscription = self.create_subscription(msg_type=CompressedImage,
+                                                               topic="/depth_image",
                                                                callback=self.camera_depth_callback,
                                                                qos_profile=10,
                                                                )
-
+        self.targetPointSubscription = self.create_subscription(msg_type=Point,
+                                                                topic='/color_image/target',
+                                                                callback=self.camera_target_callback,
+                                                                qos_profile=10)
+        self.targetSpeedSubscription = self.create_subscription(msg_type=Twist,
+                                                                topic='/color_image/velocity',
+                                                                callback=self.camera_velocity_callback,
+                                                                qos_profile=10)
         self.controlGamepad = gamepad.Gamepad(interface=config.gamepadInterface, connecting_using_ds4drv=False)
-        self.logoController = logo.LogoFollowerController((config.colorImageWidth, config.colorImageHeight))
         self.imagePainter = paint.Painter()
-
         self.speedTwist = Twist()
 
     def control_timer_callback(self):
@@ -85,8 +83,6 @@ class LogoFollowerNode(Node):
                 self.manualTimer.cancel()
                 self.autoTimer.cancel()
                 self.modeSwitchFlag = True
-                # self.commonLogger.info("Manual mode has been disabled")
-                # self.commonLogger.info("Auto mode has been disabled")
         elif config.operatingMode == config.MANUAL:
             if self.debugTimer.is_canceled() and self.autoTimer.is_canceled():
                 if self.modeSwitchFlag:
@@ -97,8 +93,6 @@ class LogoFollowerNode(Node):
                 self.debugTimer.cancel()
                 self.autoTimer.cancel()
                 self.modeSwitchFlag = True
-                # self.commonLogger.info("Debug mode has been disabled")
-                # self.commonLogger.info("Auto mode has been disabled")
         elif config.operatingMode == config.AUTO:
             if self.debugTimer.is_canceled() and self.manualTimer.is_canceled():
                 if self.modeSwitchFlag:
@@ -109,8 +103,6 @@ class LogoFollowerNode(Node):
                 self.debugTimer.cancel()
                 self.manualTimer.cancel()
                 self.modeSwitchFlag = True
-                # self.commonLogger.info("Debug mode has been disabled")
-                # self.commonLogger.info("Manual mode has been disabled")
 
     def debug_timer_callback(self):
         """
@@ -158,34 +150,20 @@ class LogoFollowerNode(Node):
         камеры робота и отправляет сообщения в среду ROS2. Если нет изображения, то таймер ставится на паузу,
         активируется таймер режима отладки. :return:
         """
-        if config.usingCamera:
-            try:
-                self.logoController.calculate_velocity_delta(self.colorImage)
-                msg = Twist()
-                msg.linear.x = self.logoController.linearDelta
-                msg.angular.z = self.logoController.angularDelta
-                self.speedTwistPublisher.publish(msg)
-                self.commonLogger.info(f" Twist velocities: \n "
-                                       f" \t x: {self.logoController.linearDelta} "
-                                       f" alpha: {self.logoController.angularDelta}")
-            except Exception:
-                self.commonLogger.error(" Camera frame is empty! \n"
-                                        " \tCheck realsense node is up.")
-                self.set_parameters([Parameter('operating_mode', Parameter.Type.INTEGER, config.DEBUG)])
-        else:
-            self.commonLogger.error(" The camera option is disabled! \n"
-                                    " \tEnable the option and restart operating mode to continue.")
-            self.set_parameters([Parameter('operating_mode', Parameter.Type.INTEGER, config.DEBUG)])
+        if self.cameraTarget != Point():
+            self.speedTwistPublisher.publish(self.cameraTarget)
 
     def camera_timer_callback(self):
+        """
+        Callback функция таймера активации окна камеры робота. Если режим автономный, то на изображении дорисовывется
+        маркер цели. :return:
+        """
         if config.usingCamera:
-            if self.logoController.logoFollower.followerLogo.is_visible:
-                targeted_image = self.imagePainter.draw_logo_target(self.colorImage,
-                                                                    self.logoController.logoFollower.followerLogo)
-                map_image = self.imagePainter.draw_minimap(targeted_image)
+            if config.operatingMode == config.AUTO:
+                result_image = self.imagePainter.draw_logo_target(self.colorImage, self.cameraTarget)
             else:
-                map_image = self.colorImage
-            cv2.imshow("Image", cv2.cvtColor(map_image, cv2.COLOR_BGR2RGB))
+                result_image = self.colorImage
+            cv2.imshow("Image", cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
             cv2.waitKey(1)
 
     def camera_color_callback(self, msg):
@@ -193,6 +171,12 @@ class LogoFollowerNode(Node):
 
     def camera_depth_callback(self, msg):
         self.depthImage = self.cvBridge.imgmsg_to_cv2(msg)
+
+    def camera_target_callback(self, msg):
+        self.cameraTarget = msg
+
+    def camera_velocity_callback(self, msg):
+        self.cameraVelocity = msg
 
 
 def main(args=None):
