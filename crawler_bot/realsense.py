@@ -5,7 +5,6 @@ import pyrealsense2 as rs
 from crawler_bot import config, logo
 from rclpy.node import Node
 from cv_bridge import CvBridge
-from ultralytics import YOLO
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import Point, Twist
 
@@ -19,7 +18,6 @@ class RealsenseNode(Node):
         self.velocityPublisher = self.create_publisher(Twist, '/color_image/velocity', 10)
         self.create_timer(config.TIMER_PERIOD, self.timer_callback)
 
-        self.YOLOv8Model = YOLO(config.nnModel).load(config.nnPath)
         self.logoFollowerController = logo.LogoFollowerController((config.imageWidth, config.imageHeight))
 
         self.pipeline = rs.pipeline()

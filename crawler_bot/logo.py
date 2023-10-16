@@ -1,8 +1,8 @@
+import logging
 import cv2
 import numpy as np
 
 from ultralytics import YOLO
-from ament_index_python import get_package_prefix
 
 from crawler_bot import config
 
@@ -19,7 +19,7 @@ class Logo(object):
 
         self.is_visible = False
 
-    def set_logo_coord(self, coord: list[int]):
+    def set_logo_coord(self, coord):
         self.logoP1 = (coord[0], coord[1])
         self.logoP2 = (coord[2], coord[3])
 
@@ -33,7 +33,7 @@ class LogoFollower(object):
     """
 
     def __init__(self, logo: Logo, target: tuple[int, int], image: np.ndarray = None):
-        self.Logger = config.commonLogger
+        self.Logger = logging.Logger("logger")
         self.followerLogo = logo
         self.followerImage = image
         self.followerTarget = target
@@ -90,7 +90,7 @@ class LogoFollowerController(object):
                  min_linear_velocity: float = -1.0,
                  min_angular_velocity: float = -1.0,
                  ):
-        self.Logger = config.commonLogger
+        self.Logger = logging.Logger('logger')
         self.logoFollower = LogoFollower(
             Logo("RCR Logo"),
             (int(image_shape[0] / 2), int(image_shape[1] / 2))

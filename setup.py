@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from ament_index_python import get_package_prefix
 
 package_name = 'crawler_bot'
-nnPath = f"{get_package_prefix('crawler_bot')}/lib/python3.10/site-packages/crawler_bot/yolov8/model.pt"
+# nnPath = f"{get_package_prefix('crawler_bot')}/share/crawler_bot/yolov8/model.pt"
 
 setup(
     name=package_name,

@@ -19,8 +19,8 @@ detectingClass = 0
 # Тип YOLOV8 модели нейронной сети
 nnModel = 'yolov8n.yaml'
 # Путь к весам нейронной сети
-# nnPath = f"{get_package_prefix('crawler_bot')}/share/crawler_bot/yolov8/model.pt"
-nnPath = f"{get_package_prefix('crawler_bot')}/lib/python3.10/site-packages/crawler_bot/yolov8/model.pt"
+nnPath = f"{get_package_prefix('crawler_bot')}/share/crawler_bot/yolov8/model.pt"
+# nnPath = f"{get_package_prefix('crawler_bot')}/lib/python3.10/site-packages/crawler_bot/yolov8/model.pt"
 # Интерфейс подключения геймпада
 gamepadInterface = "/dev/input/js0"
 # Картинка для тестирования модуля распознавания
