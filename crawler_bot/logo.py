@@ -102,8 +102,8 @@ class LogoFollowerController(object):
         self.minLinearVelocity = min_linear_velocity
         self.minAngularVelocity = min_angular_velocity
 
-        self.pLinearRatio = -1.
-        self.pAngularRatio = -2.
+        self.pLinearRatio = 1.
+        self.pAngularRatio = 1.
 
         self.linearDelta = 0.0
         self.angularDelta = 0.0
@@ -112,8 +112,8 @@ class LogoFollowerController(object):
         self.logoFollower.detect_logo(image)
         d_x, d_y = self.logoFollower.calculate_deltas()
 
-        self.linearDelta = d_y / image.shape[1] * self.pLinearRatio
-        self.angularDelta = d_x / image.shape[0] * self.pAngularRatio
+        self.linearDelta = d_y / image.shape[1] * self.pLinearRatio + 0.85
+        self.angularDelta = d_x / image.shape[0] * self.pAngularRatio + 2.7
 
     def control(self, image):
         self.calculate_velocity_delta(image)

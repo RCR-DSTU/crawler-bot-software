@@ -151,6 +151,8 @@ class LogoFollowerNode(Node):
         активируется таймер режима отладки. :return:
         """
         if self.cameraTarget != Point():
+            self.cameraVelocity.linear.x = - self.cameraVelocity.linear.x
+            self.cameraVelocity.angular.z = - self.cameraVelocity.angular.z
             self.speedTwistPublisher.publish(self.cameraVelocity)
 
     def camera_timer_callback(self):

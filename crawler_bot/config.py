@@ -26,9 +26,9 @@ gamepadInterface = "/dev/input/js0"
 # Картинка для тестирования модуля распознавания
 testImagePath = 'media/StreetPhoto.jpg'
 # Переменная, хранящая текущий режим работы из параметров
-operatingMode = DEBUG
+operatingMode = AUTO
 # Флаг испльзования камеры
-usingCamera = False
+usingCamera = True
 # Пустая переменная для экземпляра ноды, чтобы можно было использовать ноду из всех скриптов, к которым подлючен
 # этот файл
 mainNode = None
