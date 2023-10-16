@@ -23,7 +23,7 @@ class Logo(object):
         self.logoP1 = (coord[0], coord[1])
         self.logoP2 = (coord[2], coord[3])
 
-    def set_logo_center(self, center: list[int]):
+    def set_logo_center(self, center):
         self.logoCenter = (center[0], center[1])
 
 
