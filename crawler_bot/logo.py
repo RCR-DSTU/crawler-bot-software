@@ -32,7 +32,7 @@ class LogoFollower(object):
     Класс детекции логотипа на изображении
     """
 
-    def __init__(self, logo: Logo, target: tuple[int, int], image: np.ndarray = None):
+    def __init__(self, logo: Logo, target, image: np.ndarray = None):
         self.Logger = logging.Logger("logger")
         self.followerLogo = logo
         self.followerImage = image
