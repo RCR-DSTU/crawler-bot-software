@@ -15,7 +15,7 @@ class Logo(object):
         self.logoP1 = (0, 0)
         self.logoP2 = (0, 0)
 
-        self.logoCenter = (0, 0)
+        self.logoCenter = (.0, .0)
 
         self.is_visible = False
 
@@ -24,7 +24,7 @@ class Logo(object):
         self.logoP2 = (coord[2], coord[3])
 
     def set_logo_center(self, center):
-        self.logoCenter = (center[0], center[1])
+        self.logoCenter = (float(center[0]), float(center[1]))
 
 
 class LogoFollower(object):
@@ -64,7 +64,7 @@ class LogoFollower(object):
 
     def detect_logo(self, image: np.ndarray):
         detected_class = self.detect_class(image)
-        if self.followerLogo.is_visible:
+        if self.followerLogo.is_visible and detected_class is not None:
             coord = detected_class.boxes.data.tolist()[0][:4]
             self.followerLogo.set_logo_coord([int(i) for i in coord])
             center = [int((self.followerLogo.logoP2[0] + self.followerLogo.logoP1[0]) / 2),

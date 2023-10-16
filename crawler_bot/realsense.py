@@ -52,7 +52,7 @@ class RealsenseNode(Node):
         point.x, point.y = self.logoFollowerController.logoFollower.followerLogo.logoCenter
 
         self.targetPublisher.publish(point)
-        self.targetPublisher.publish(twist)
+        self.velocityPublisher.publish(twist)
 
 
 def main():

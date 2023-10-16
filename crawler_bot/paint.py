@@ -8,6 +8,7 @@ class Painter(object):
     WHITE_COLOR = (255, 255, 255)
     GRAY_COLOR = (128, 128, 128)
     BLACK_COLOR = (0, 0, 0)
+    RED_COLOR = (255, 0, 0)
 
     def __init__(self):
         self.painterImage = None
@@ -32,8 +33,9 @@ class Painter(object):
         return self.painterImage
 
     def draw_logo_target(self, image, target):
-        t = (target.x, target.y)
-        image = cv2.drawMarker(image, t, self.BLACK_COLOR, 0)
+        t_x = int(target.x)
+        t_y = int(target.y)
+        image = cv2.drawMarker(image, [t_x, t_y], self.RED_COLOR, 0, 4, 4)
         return image
 
     def refresh_image(self, image):

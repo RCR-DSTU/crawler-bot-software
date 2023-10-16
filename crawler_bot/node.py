@@ -151,7 +151,7 @@ class LogoFollowerNode(Node):
         активируется таймер режима отладки. :return:
         """
         if self.cameraTarget != Point():
-            self.speedTwistPublisher.publish(self.cameraTarget)
+            self.speedTwistPublisher.publish(self.cameraVelocity)
 
     def camera_timer_callback(self):
         """
@@ -167,10 +167,10 @@ class LogoFollowerNode(Node):
             cv2.waitKey(1)
 
     def camera_color_callback(self, msg):
-        self.colorImage = self.cvBridge.imgmsg_to_cv2(msg)
+        self.colorImage = self.cvBridge.compressed_imgmsg_to_cv2(msg)
 
     def camera_depth_callback(self, msg):
-        self.depthImage = self.cvBridge.imgmsg_to_cv2(msg)
+        self.depthImage = self.cvBridge.compressed_imgmsg_to_cv2(msg)
 
     def camera_target_callback(self, msg):
         self.cameraTarget = msg
