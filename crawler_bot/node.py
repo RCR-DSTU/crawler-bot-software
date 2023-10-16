@@ -1,5 +1,6 @@
 import cv2
 import rclpy
+import time
 
 from cv_bridge import CvBridge
 from rclpy.node import Node
@@ -15,6 +16,24 @@ class LogoFollowerNode(Node):
 
         self.commonLogger = self.get_logger()
         self.modeSwitchFlag = True
+        self.colorImageSubscription = self.create_subscription(msg_type=CompressedImage,
+                                                               topic="/color_image",
+                                                               callback=self.camera_color_callback,
+                                                               qos_profile=10,
+                                                               )
+        self.depthImageSubscription = self.create_subscription(msg_type=CompressedImage,
+                                                               topic="/depth_image",
+                                                               callback=self.camera_depth_callback,
+                                                               qos_profile=10,
+                                                               )
+        self.targetPointSubscription = self.create_subscription(msg_type=Point,
+                                                                topic='/color_image/target',
+                                                                callback=self.camera_target_callback,
+                                                                qos_profile=10)
+        self.targetSpeedSubscription = self.create_subscription(msg_type=Twist,
+                                                                topic='/color_image/velocity',
+                                                                callback=self.camera_velocity_callback,
+                                                                qos_profile=10)
         self.debugTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
                                             callback=self.debug_timer_callback)
         self.manualTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
@@ -41,24 +60,6 @@ class LogoFollowerNode(Node):
         self.colorImage = None
         self.depthImage = None
         self.cameraVelocity = None
-        self.colorImageSubscription = self.create_subscription(msg_type=CompressedImage,
-                                                               topic="/color_image",
-                                                               callback=self.camera_color_callback,
-                                                               qos_profile=10,
-                                                               )
-        self.depthImageSubscription = self.create_subscription(msg_type=CompressedImage,
-                                                               topic="/depth_image",
-                                                               callback=self.camera_depth_callback,
-                                                               qos_profile=10,
-                                                               )
-        self.targetPointSubscription = self.create_subscription(msg_type=Point,
-                                                                topic='/color_image/target',
-                                                                callback=self.camera_target_callback,
-                                                                qos_profile=10)
-        self.targetSpeedSubscription = self.create_subscription(msg_type=Twist,
-                                                                topic='/color_image/velocity',
-                                                                callback=self.camera_velocity_callback,
-                                                                qos_profile=10)
         self.controlGamepad = gamepad.Gamepad(interface=config.gamepadInterface, connecting_using_ds4drv=False)
         self.imagePainter = paint.Painter()
         self.speedTwist = Twist()
@@ -165,7 +166,10 @@ class LogoFollowerNode(Node):
                 result_image = self.imagePainter.draw_logo_target(self.colorImage, self.cameraTarget)
             else:
                 result_image = self.colorImage
-            cv2.imshow("Image", cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
+            try:
+                cv2.imshow("Image", cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
+            except:
+                pass
             cv2.waitKey(1)
 
     def camera_color_callback(self, msg):
