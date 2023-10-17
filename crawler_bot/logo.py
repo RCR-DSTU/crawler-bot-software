@@ -41,6 +41,7 @@ class LogoFollower(object):
 
     def detect_class(self, image):
         detections = []
+        true_detections = []
         # noinspection PyBroadException
         try:
             detections = self.followerYOLOv8Model.predict(image)[0]
@@ -54,13 +55,28 @@ class LogoFollower(object):
             for d in detections:
                 cls = int(d.boxes.cls[0].item())
                 if cls == config.detectingClass:
-                    self.followerLogo.is_visible = True
-                    return d
+                    true_detections.append(d)
                 else:
                     self.followerLogo.is_visible = False
         except Exception:
             self.Logger.error(f" No logo on image!")
             self.followerLogo.is_visible = False
+        if not true_detections:
+            return None
+        self.followerLogo.is_visible = True
+        if len(true_detections) == 1:
+            return true_detections[0]
+        true_logo = true_detections[0]
+        true_coord = true_logo.boxes.data.tolist()[0][:4]
+        true_center = [(true_coord[2] + true_coord[0]) / 2, (true_coord[1] + true_coord[3]) / 2]
+        true_dx = abs(true_center[0] - self.followerLogo.logoCenter[0])
+        for logo in true_detections[1:]:
+            coord = logo.boxes.data.tolist()[0][:4]
+            center = [(coord[2] + coord[0]) / 2, (coord[1] + coord[3]) / 2]
+            dx = abs(center[0] - self.followerLogo.logoCenter[0])
+            if dx < true_dx:
+                true_dx = dx
+        return true_logo
 
     def detect_logo(self, image: np.ndarray):
         detected_class = self.detect_class(image)

@@ -51,10 +51,11 @@ class RealsenseNode(Node):
         twist = Twist()
         point = Point()
         x, z = self.logoFollowerController.control(color_image)
-        print(self.logoFollowerController.logoFollower.followerLogo.is_visible)
+        # print(self.logoFollowerController.logoFollower.followerLogo.is_visible)
         if self.logoFollowerController.logoFollower.followerLogo.is_visible:
             point.x, point.y = self.logoFollowerController.logoFollower.followerLogo.logoCenter
             twist.linear.x, twist.angular.z = x, z
+            print(x, z)
 
         self.targetPublisher.publish(point)
         self.velocityPublisher.publish(twist)
