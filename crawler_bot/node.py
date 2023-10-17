@@ -47,8 +47,8 @@ class LogoFollowerNode(Node):
         self.debugTimer.cancel()
         self.manualTimer.cancel()
         self.autoTimer.cancel()
-        self.declare_parameter('linear_velocity_x', 0.0)
-        self.declare_parameter('angular_velocity_z', 0.0)
+        self.declare_parameter('linear_velocity', 0.0)
+        self.declare_parameter('angular_velocity', 0.0)
         self.declare_parameter('operating_mode', config.operatingMode)
         self.declare_parameter('use_camera', config.usingCamera)
         self.speedTwistPublisher = self.create_publisher(msg_type=Twist,
@@ -110,8 +110,8 @@ class LogoFollowerNode(Node):
         Callback функция таймера управления роботом в режиме отладки. Получает скорости робота из параметров среды
         ROS2 и отправляет сообщения в среду ROS2. :return:
         """
-        l_x = self.get_parameter('linear_velocity_x').get_parameter_value().double_value
-        a_z = self.get_parameter('angular_velocity_z').get_parameter_value().double_value
+        l_x = self.get_parameter('linear_velocity').get_parameter_value().double_value
+        a_z = self.get_parameter('angular_velocity').get_parameter_value().double_value
         if self.speedTwist.linear.x != l_x:
             self.commonLogger.info(f"Linear X Speed was change {self.speedTwist.linear.x} -> {l_x}")
             self.speedTwist.linear.x = l_x

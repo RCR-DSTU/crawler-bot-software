@@ -1,4 +1,5 @@
 import cv2
+import time
 import rclpy
 import numpy as np
 import pyrealsense2 as rs
@@ -31,6 +32,8 @@ class RealsenseNode(Node):
         self.profile = self.pipeline.start()
 
     def timer_callback(self):
+        # start_time = time.time()
+
         frames = self.pipeline.wait_for_frames()
 
         color_frame = frames.get_color_frame()
@@ -46,13 +49,17 @@ class RealsenseNode(Node):
         self.depthPublisher.publish(self.cvBridge.cv2_to_compressed_imgmsg(depth_image))
 
         twist = Twist()
-        twist.linear.x, twist.angular.z = self.logoFollowerController.control(color_image)
-
         point = Point()
-        point.x, point.y = self.logoFollowerController.logoFollower.followerLogo.logoCenter
+        x, z = self.logoFollowerController.control(color_image)
+        print(self.logoFollowerController.logoFollower.followerLogo.is_visible)
+        if self.logoFollowerController.logoFollower.followerLogo.is_visible:
+            point.x, point.y = self.logoFollowerController.logoFollower.followerLogo.logoCenter
+            twist.linear.x, twist.angular.z = x, z
 
         self.targetPublisher.publish(point)
         self.velocityPublisher.publish(twist)
+
+        # print("FPS: ", 1.0 / (time.time() - start_time))
 
 
 def main():
