@@ -3,6 +3,7 @@ import rclpy
 import time
 
 from cv_bridge import CvBridge
+from rclpy import Parameter
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import CompressedImage
@@ -59,10 +60,12 @@ class LogoFollowerNode(Node):
         self.cameraTarget = Point()
         self.colorImage = None
         self.depthImage = None
-        self.cameraVelocity = None
+        self.cameraVelocity = Twist()
         self.controlGamepad = gamepad.Gamepad(interface=config.gamepadInterface, connecting_using_ds4drv=False)
         self.imagePainter = paint.Painter()
         self.speedTwist = Twist()
+
+        self.checkAutoModeTimer = time.time()
 
     def control_timer_callback(self):
         """
@@ -151,10 +154,15 @@ class LogoFollowerNode(Node):
         камеры робота и отправляет сообщения в среду ROS2. Если нет изображения, то таймер ставится на паузу,
         активируется таймер режима отладки. :return:
         """
-        if self.cameraTarget != Point():
-            self.cameraVelocity.linear.x = - self.cameraVelocity.linear.x
-            self.cameraVelocity.angular.z = - self.cameraVelocity.angular.z
-            self.speedTwistPublisher.publish(self.cameraVelocity)
+        if self.checkAutoModeTimer + 5 < time.time():
+            self.commonLogger.info("Realsense node messages did not arrive with in 5 seconds \n"
+                                   "    Turning Auto Mode off.")
+            self.autoTimer.cancel()
+            self.set_parameters([Parameter('operating_mode', Parameter.Type.INTEGER, 0)])
+            self.modeSwitchFlag = True
+        self.cameraVelocity.linear.x = - self.cameraVelocity.linear.x
+        self.cameraVelocity.angular.z = - self.cameraVelocity.angular.z
+        self.speedTwistPublisher.publish(self.cameraVelocity)
 
     def camera_timer_callback(self):
         """
@@ -182,6 +190,7 @@ class LogoFollowerNode(Node):
         self.cameraTarget = msg
 
     def camera_velocity_callback(self, msg):
+        self.checkAutoModeTimer = time.time()
         self.cameraVelocity = msg
 
 
