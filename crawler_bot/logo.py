@@ -118,8 +118,8 @@ class LogoFollowerController(object):
         self.minLinearVelocity = min_linear_velocity
         self.minAngularVelocity = min_angular_velocity
 
-        self.pLinearRatio = 1.5
-        self.pAngularRatio = -1.5
+        self.pLinearRatio = -1.5
+        self.pAngularRatio = 1.5
 
         self.linearDelta = 0.0
         self.angularDelta = 0.0
