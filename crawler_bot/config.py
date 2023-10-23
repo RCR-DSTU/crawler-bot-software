@@ -15,7 +15,7 @@ AUTO = 2
 
 
 # Класс объектов, которые необходимо отслеживать
-detectingClass = 0
+detectingClass = 0  # Integer
 # Тип YOLOV8 модели нейронной сети
 nnModel = 'yolov8n.yaml'
 # Путь к весам нейронной сети
@@ -26,14 +26,16 @@ gamepadInterface = "/dev/input/js0"
 # Картинка для тестирования модуля распознавания
 testImagePath = 'media/StreetPhoto.jpg'
 # Переменная, хранящая текущий режим работы из параметров
-operatingMode = AUTO
+operatingMode = MANUAL  # Integer
 # Флаг испльзования камеры
-usingCamera = True
+usingCamera = False  # Boolean
 # Пустая переменная для экземпляра ноды, чтобы можно было использовать ноду из всех скриптов, к которым подлючен
 # этот файл
-mainNode = None
-# Период таймера всех РОС2 таймеров (20 раз в секунду)
-TIMER_PERIOD = 0.05
+mainNode = None  # None
+# Период таймера в секундах всех РОС2 таймеров (20 раз в секунду)
+TIMER_PERIOD = 0.2  # sec
+# Таймаут для выключения автономного режима, если не поступает изображения с камеры в миллисекундах
+AUTO_MODE_TIMEOUT = 10000  # msec
 
 
 

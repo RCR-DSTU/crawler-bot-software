@@ -33,34 +33,37 @@ class RealsenseNode(Node):
 
     def timer_callback(self):
         # start_time = time.time()
+        # noinspection PyBroadException
+        try:
+            frames = self.pipeline.wait_for_frames()
 
-        frames = self.pipeline.wait_for_frames()
+            color_frame = frames.get_color_frame()
+            depth_frame = frames.get_depth_frame()
+            color_image = np.asanyarray(color_frame.get_data())
+            depth_image = np.asanyarray(depth_frame.get_data())
 
-        color_frame = frames.get_color_frame()
-        depth_frame = frames.get_depth_frame()
-        color_image = np.asanyarray(color_frame.get_data())
-        depth_image = np.asanyarray(depth_frame.get_data())
+            shape = (int(config.imageWidth / 4), int(config.imageHeight / 4))
+            color_image = cv2.resize(color_image, shape)
+            depth_image = cv2.resize(depth_image, shape)
 
-        shape = (int(config.imageWidth / 4), int(config.imageHeight / 4))
-        color_image = cv2.resize(color_image, shape)
-        depth_image = cv2.resize(depth_image, shape)
+            self.colorPublisher.publish(self.cvBridge.cv2_to_compressed_imgmsg(color_image))
+            self.depthPublisher.publish(self.cvBridge.cv2_to_compressed_imgmsg(depth_image))
 
-        self.colorPublisher.publish(self.cvBridge.cv2_to_compressed_imgmsg(color_image))
-        self.depthPublisher.publish(self.cvBridge.cv2_to_compressed_imgmsg(depth_image))
+            twist = Twist()
+            point = Point()
+            x, z = self.logoFollowerController.control(color_image)
+            # print(self.logoFollowerController.logoFollower.followerLogo.is_visible)
+            if self.logoFollowerController.logoFollower.followerLogo.is_visible:
+                point.x, point.y = self.logoFollowerController.logoFollower.followerLogo.logoCenter
+                twist.linear.x, twist.angular.z = x, z
+                # print(x, z)
 
-        twist = Twist()
-        point = Point()
-        x, z = self.logoFollowerController.control(color_image)
-        # print(self.logoFollowerController.logoFollower.followerLogo.is_visible)
-        if self.logoFollowerController.logoFollower.followerLogo.is_visible:
-            point.x, point.y = self.logoFollowerController.logoFollower.followerLogo.logoCenter
-            twist.linear.x, twist.angular.z = x, z
-            print(x, z)
+            self.targetPublisher.publish(point)
+            self.velocityPublisher.publish(twist)
 
-        self.targetPublisher.publish(point)
-        self.velocityPublisher.publish(twist)
-
-        # print("FPS: ", 1.0 / (time.time() - start_time))
+            # print("FPS: ", 1.0 / (time.time() - start_time))
+        except Exception:
+            self.get_logger().info(Exception)
 
 
 def main():

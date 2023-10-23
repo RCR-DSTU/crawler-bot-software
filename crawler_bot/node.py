@@ -154,7 +154,7 @@ class LogoFollowerNode(Node):
         камеры робота и отправляет сообщения в среду ROS2. Если нет изображения, то таймер ставится на паузу,
         активируется таймер режима отладки. :return:
         """
-        if self.checkAutoModeTimer + 5 < time.time():
+        if self.checkAutoModeTimer + config.AUTO_MODE_TIMEOUT < time.time():
             self.commonLogger.info("Realsense node messages did not arrive with in 5 seconds \n"
                                    "    Turning Auto Mode off.")
             self.autoTimer.cancel()
