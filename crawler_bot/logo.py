@@ -103,7 +103,7 @@ class LogoFollowerController(object):
         self.Logger = logging.Logger('logger')
         self.logoFollower = LogoFollower(
             Logo(config.detectingLogoName),
-            (int(config.imageWidth[0] / 2), int(config.imageHeight[1] / 2))
+            (int(config.imageWidth / 2), int(config.imageHeight / 2))
         )
         self.followerImageShape = (config.imageWidth, config.imageHeight)
 
