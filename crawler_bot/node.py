@@ -18,21 +18,21 @@ class LogoFollowerNode(Node):
         self.commonLogger = self.get_logger()
         self.modeSwitchFlag = True
         self.colorImageSubscription = self.create_subscription(msg_type=CompressedImage,
-                                                               topic="/color_image",
+                                                               topic="/realsense/color_image",
                                                                callback=self.camera_color_callback,
                                                                qos_profile=10,
                                                                )
         self.depthImageSubscription = self.create_subscription(msg_type=CompressedImage,
-                                                               topic="/depth_image",
+                                                               topic="/realsense/depth_image",
                                                                callback=self.camera_depth_callback,
                                                                qos_profile=10,
                                                                )
         self.targetPointSubscription = self.create_subscription(msg_type=Point,
-                                                                topic='/color_image/target',
+                                                                topic='/realsense/target',
                                                                 callback=self.camera_target_callback,
                                                                 qos_profile=10)
         self.targetSpeedSubscription = self.create_subscription(msg_type=Twist,
-                                                                topic='/color_image/velocity',
+                                                                topic='/realsense/twist',
                                                                 callback=self.camera_velocity_callback,
                                                                 qos_profile=10)
         self.debugTimer = self.create_timer(timer_period_sec=config.TIMER_PERIOD,
@@ -66,6 +66,8 @@ class LogoFollowerNode(Node):
         self.speedTwist = Twist()
 
         self.checkAutoModeTimer = time.time()
+
+        self.commonLogger.info(f"Crawler Bot -> Main Controller Node was started...")
 
     def control_timer_callback(self):
         """
@@ -147,6 +149,7 @@ class LogoFollowerNode(Node):
                                                   interface=config.gamepadInterface,
                                                   connecting_using_ds4drv=False)
             self.manualTimer.cancel()
+            self.modeSwitchFlag = True
 
     def auto_timer_callback(self):
         """
@@ -155,7 +158,8 @@ class LogoFollowerNode(Node):
         активируется таймер режима отладки. :return:
         """
         if self.checkAutoModeTimer + config.AUTO_MODE_TIMEOUT < time.time():
-            self.commonLogger.info("Realsense node messages did not arrive with in 5 seconds \n"
+            self.commonLogger.info(f"Realsense node messages did not arrive with in {config.AUTO_MODE_TIMEOUT / 1000}"
+                                   f" seconds \n"
                                    "    Turning Auto Mode off.")
             self.autoTimer.cancel()
             self.set_parameters([Parameter('operating_mode', Parameter.Type.INTEGER, 0)])

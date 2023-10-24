@@ -99,24 +99,18 @@ class LogoFollower(object):
 
 
 class LogoFollowerController(object):
-    def __init__(self,
-                 image_shape: tuple,
-                 max_linear_velocity: float = 1.0,
-                 max_angular_velocity: float = 1.0,
-                 min_linear_velocity: float = -1.0,
-                 min_angular_velocity: float = -1.0,
-                 ):
+    def __init__(self):
         self.Logger = logging.Logger('logger')
         self.logoFollower = LogoFollower(
-            Logo("RCR Logo"),
-            (int(image_shape[0] / 2), int(image_shape[1] / 2))
+            Logo(config.detectingLogoName),
+            (int(config.imageWidth[0] / 2), int(config.imageHeight[1] / 2))
         )
-        self.followerImageShape = image_shape
+        self.followerImageShape = (config.imageWidth, config.imageHeight)
 
-        self.maxLinearVelocity = max_linear_velocity
-        self.maxAngularVelocity = max_angular_velocity
-        self.minLinearVelocity = min_linear_velocity
-        self.minAngularVelocity = min_angular_velocity
+        self.maxLinearVelocity = config.max_linear_velocity
+        self.maxAngularVelocity = config.max_angular_velocity
+        self.minLinearVelocity = config.min_linear_velocity
+        self.minAngularVelocity = config.min_angular_velocity
 
         self.pLinearRatio = -1.5
         self.pAngularRatio = 1.5
@@ -126,10 +120,10 @@ class LogoFollowerController(object):
 
     def calculate_velocity_delta(self, image):
         self.logoFollower.detect_logo(image)
-        d_x, d_y = self.logoFollower.calculate_deltas()
+        delta_x, delta_y = self.logoFollower.calculate_deltas()
 
-        self.linearDelta = (d_y / image.shape[1] + 0.85) * self.pLinearRatio
-        self.angularDelta = (d_x / image.shape[0] + 2.7) * self.pAngularRatio
+        self.linearDelta = (delta_y / image.shape[1] + 0.85) * self.pLinearRatio
+        self.angularDelta = (delta_x / image.shape[0] + 2.7) * self.pAngularRatio
 
     def control(self, image):
         self.calculate_velocity_delta(image)
@@ -138,7 +132,7 @@ class LogoFollowerController(object):
 
 def main():
     image = cv2.imread(config.testImagePath)
-    logo_follower_controller = LogoFollowerController(image_shape=image.shape[:2])
+    logo_follower_controller = LogoFollowerController()
     logo_follower_controller.control(image)
 
 
