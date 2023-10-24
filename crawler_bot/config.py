@@ -18,6 +18,13 @@ TIMER_PERIOD = 0.2  # sec
 AUTO_MODE_TIMEOUT = 10000  # msec
 
 
+#  Максимальные и минимальные значения скоростей для управления роботом
+max_linear_velocity: float = 1.0
+max_angular_velocity: float = 1.0
+min_linear_velocity: float = -1.0
+min_angular_velocity: float = -1.0
+#  Среднее значение ускорения робота
+averageAcceleration = 0.001
 # Класс объектов, которые необходимо отслеживать, после распознавания нейронной сети
 detectingClass = 0  # Integer
 # Название логотипа распознаваемого нейронной сетью
@@ -38,11 +45,4 @@ usingCamera = True  # Boolean
 # Пустая переменная для экземпляра ноды, чтобы можно было использовать ноду из всех скриптов, к которым подлючен
 # этот файл
 mainNode = None  # None
-#  Максимальные и минимальные значения скоростей для управления роботом
-max_linear_velocity: float = 1.0
-max_angular_velocity: float = 1.0
-min_linear_velocity: float = -1.0
-min_angular_velocity: float = -1.0
-
-
 

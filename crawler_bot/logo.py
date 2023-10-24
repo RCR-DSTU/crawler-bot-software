@@ -112,6 +112,8 @@ class LogoFollowerController(object):
         self.minLinearVelocity = config.min_linear_velocity
         self.minAngularVelocity = config.min_angular_velocity
 
+        self.averageAcceleration = config.averageAcceleration
+
         self.pLinearRatio = -1.5
         self.pAngularRatio = 1.5
 
@@ -128,14 +130,14 @@ class LogoFollowerController(object):
     def control(self, image):
         past_linear, past_angular = self.linearDelta, self.angularDelta
         self.calculate_velocity_delta(image)
-        if self.linearDelta > past_linear + 0.05:
-            self.linearDelta += 0.05
-        elif self.linearDelta < past_linear - 0.05:
-            self.linearDelta -= 0.05
-        if self.angularDelta > past_angular + 0.05:
-            self.angularDelta += 0.05
-        elif self.angularDelta < past_angular - 0.05:
-            self.angularDelta -= 0.05
+        if self.linearDelta > past_linear + self.averageAcceleration:
+            self.linearDelta += self.averageAcceleration
+        elif self.linearDelta < past_linear - self.averageAcceleration:
+            self.linearDelta -= self.averageAcceleration
+        if self.angularDelta > past_angular + self.averageAcceleration:
+            self.angularDelta += self.averageAcceleration
+        elif self.angularDelta < past_angular - self.averageAcceleration:
+            self.angularDelta -= self.averageAcceleration
 
         if self.linearDelta > self.maxLinearVelocity:
             self.linearDelta = self.maxLinearVelocity
