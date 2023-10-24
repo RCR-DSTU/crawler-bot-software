@@ -130,14 +130,14 @@ class LogoFollowerController(object):
     def control(self, image):
         past_linear, past_angular = self.linearDelta, self.angularDelta
         self.calculate_velocity_delta(image)
-        if self.linearDelta > past_linear + self.averageAcceleration:
-            self.linearDelta += self.averageAcceleration
-        elif self.linearDelta < past_linear - self.averageAcceleration:
-            self.linearDelta -= self.averageAcceleration
-        if self.angularDelta > past_angular + self.averageAcceleration:
-            self.angularDelta += self.averageAcceleration
-        elif self.angularDelta < past_angular - self.averageAcceleration:
-            self.angularDelta -= self.averageAcceleration
+        if self.linearDelta > past_linear:
+            self.linearDelta = past_linear + self.averageAcceleration
+        elif self.linearDelta < past_linear:
+            self.linearDelta = past_linear - self.averageAcceleration
+        if self.angularDelta > past_angular:
+            self.angularDelta = past_angular + self.averageAcceleration
+        elif self.angularDelta < past_angular:
+            self.angularDelta = past_angular - self.averageAcceleration
 
         if self.linearDelta > self.maxLinearVelocity:
             self.linearDelta = self.maxLinearVelocity
