@@ -19,6 +19,8 @@ class RealsenseNode(Node):
         self.velocityPublisher = self.create_publisher(Twist, '/realsense/twist', 10)
         self.create_timer(config.TIMER_PERIOD, self.timer_callback)
 
+        self.declare_parameter('average_acceleration', 0.01)
+
         self.logoFollowerController = logo.LogoFollowerController()
 
         self.pipeline = rs.pipeline()
@@ -32,8 +34,14 @@ class RealsenseNode(Node):
         self.profile = self.pipeline.start()
         self.get_logger().info(f"Realsense Node was started...")
 
+        cv2.namedWindow("Realsense Image Window")
+        self.cvKey = 255
+
     def timer_callback(self):
         start_time = time.time()
+
+        self.logoFollowerController.averageAcceleration = (self.get_parameter('average_acceleration').
+                                                           get_parameter_value().double_value)
         # noinspection PyBroadException
         try:
             frames = self.pipeline.wait_for_frames()
@@ -43,7 +51,7 @@ class RealsenseNode(Node):
             color_image = np.asanyarray(color_frame.get_data())
             depth_image = np.asanyarray(depth_frame.get_data())
 
-            shape = (int(config.imageWidth / 4), int(config.imageHeight / 4))
+            shape = (int(config.imageWidth), int(config.imageHeight))
             color_image = cv2.resize(color_image, shape)
             depth_image = cv2.resize(depth_image, shape)
 
@@ -62,6 +70,29 @@ class RealsenseNode(Node):
             self.velocityPublisher.publish(twist)
 
             print("FPS: ", 1.0 / (time.time() - start_time))
+
+            key = cv2.waitKey(1) & 0xFF
+            if key != 255:
+                self.cvKey = key
+
+            if self.cvKey == ord('1'):
+                # ---
+                image = cv2.putText(color_image,
+                                    f"FPS: {int(1.0 / (time.time() - start_time))}",
+                                    (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+                image = cv2.rectangle(image, self.logoFollowerController.logoFollower.followerLogo.logoP1,
+                                      self.logoFollowerController.logoFollower.followerLogo.logoP2,
+                                      (0, 255, 0), 1)
+                image = cv2.putText(image,
+                                    f"{self.logoFollowerController.logoFollower.followerLogo.distanceProbability} "
+                                    f"{self.logoFollowerController.logoFollower.followerLogo.colorProbability}",
+                                    self.logoFollowerController.logoFollower.followerLogo.logoP1,
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                cv2.imshow("Realsense Image Window", image)
+                cv2.waitKey(1)
+                # ---
         except Exception:
             self.get_logger().warn(f"Realsense Node can not receive or process frames!")
 

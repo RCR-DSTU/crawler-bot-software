@@ -1,8 +1,8 @@
 from ament_index_python import get_package_prefix
 
 
-imageWidth = 1280
-imageHeight = 720
+imageWidth = int(1280 / 4)
+imageHeight = int(720 / 4)
 
 
 # Ниже определены 3 режима работы робота:
@@ -19,12 +19,12 @@ AUTO_MODE_TIMEOUT = 10000  # msec
 
 
 #  Максимальные и минимальные значения скоростей для управления роботом
-max_linear_velocity: float = 1.0
-max_angular_velocity: float = 1.0
-min_linear_velocity: float = -1.0
-min_angular_velocity: float = -1.0
+max_linear_velocity = 1.0
+max_angular_velocity = 1.0
+min_linear_velocity = -1.0
+min_angular_velocity = -1.0
 #  Среднее значение ускорения робота
-averageAcceleration = 0.001
+averageAcceleration = 0.01
 # Класс объектов, которые необходимо отслеживать, после распознавания нейронной сети
 detectingClass = 0  # Integer
 # Название логотипа распознаваемого нейронной сетью
