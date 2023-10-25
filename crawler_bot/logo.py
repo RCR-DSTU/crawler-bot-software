@@ -123,7 +123,7 @@ class LogoFollower(object):
 
     def detect_logo(self, image: np.ndarray):
         detected_class_logos = self.detect_class(image)
-        print(f"info: {len(detected_class_logos)}")
+        self.possibleLogos.clear()
         if detected_class_logos is not None:
             if len(detected_class_logos) == 1:
                 self.followerLogo = self.calc_logo_params(image, detected_class_logos[0])
@@ -137,10 +137,9 @@ class LogoFollower(object):
                     true_probability = true_logo.colorProbability * true_logo.distanceProbability
                     if probability < true_probability:
                         true_logo = logo
-                    if probability + 0.5 < true_probability:
-                        print(f"warn: {len(detected_class_logos)}")
                 self.followerLogo = true_logo
         else:
+            self.followerLogo = Logo()
             self.Logger.warning(f" No logo on image! \n"
                                 f" \t Waiting for logo in frame.")
 
@@ -167,8 +166,8 @@ class LogoFollowerController(object):
 
         self.averageAcceleration = config.averageAcceleration
 
-        self.pLinearRatio = -1.5
-        self.pAngularRatio = 1.5
+        self.pLinearRatio = -1.
+        self.pAngularRatio = 1.
 
         self.linearDelta = 0.0
         self.angularDelta = 0.0
@@ -177,8 +176,10 @@ class LogoFollowerController(object):
         self.logoFollower.detect_logo(image)
         delta_x, delta_y = self.logoFollower.calculate_deltas()
 
-        self.linearDelta = (delta_y / image.shape[1] + 0.85) * self.pLinearRatio
-        self.angularDelta = (delta_x / image.shape[0] + 2.7) * self.pAngularRatio
+        self.linearDelta = (delta_y / image.shape[1]) * self.pLinearRatio
+        self.angularDelta = (delta_x / image.shape[0]) * self.pAngularRatio
+
+        print("")
 
     def control(self, image):
         past_linear, past_angular = self.linearDelta, self.angularDelta

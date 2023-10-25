@@ -69,7 +69,7 @@ class RealsenseNode(Node):
             self.targetPublisher.publish(point)
             self.velocityPublisher.publish(twist)
 
-            print("FPS: ", 1.0 / (time.time() - start_time))
+            # print("FPS: ", 1.0 / (time.time() - start_time))
 
             key = cv2.waitKey(1) & 0xFF
             if key != 255:
