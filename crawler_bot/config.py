@@ -27,7 +27,7 @@ min_angular_velocity = -1.0
 averageAcceleration = 0.01
 # Коэффициенты регуляторов в автономном режиме
 pLinearRatio = 1.5
-pAngularRatio = 1.5
+pAngularRatio = 1.0
 # Класс объектов, которые необходимо отслеживать, после распознавания нейронной сети
 detectingClass = 0  # Integer
 # Название логотипа распознаваемого нейронной сетью
