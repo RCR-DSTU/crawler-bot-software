@@ -166,8 +166,8 @@ class LogoFollowerController(object):
 
         self.averageAcceleration = config.averageAcceleration
 
-        self.pLinearRatio = -1.
-        self.pAngularRatio = 1.
+        self.pLinearRatio = -config.pLinearRatio
+        self.pAngularRatio = config.pAngularRatio
 
         self.linearDelta = 0.0
         self.angularDelta = 0.0

@@ -175,9 +175,11 @@ class LogoFollowerNode(Node):
         """
         if config.usingCamera:
             if config.operatingMode == config.AUTO:
-                result_image = self.imagePainter.draw_logo_target(self.colorImage, self.cameraTarget)
-            else:
-                result_image = self.colorImage
+                if type(self.colorImage) == type(None):
+                    result_image = self.colorImage
+                else:
+                    result_image = self.imagePainter.draw_logo_target(self.colorImage, self.cameraTarget)
+                    result_image = cv2.resize(result_image, (1600, 900), interpolation=cv2.INTER_AREA)
             try:
                 cv2.imshow("Image", cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
             except:
