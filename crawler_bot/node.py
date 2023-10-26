@@ -164,9 +164,9 @@ class LogoFollowerNode(Node):
             self.autoTimer.cancel()
             self.set_parameters([Parameter('operating_mode', Parameter.Type.INTEGER, 0)])
             self.modeSwitchFlag = True
-        self.cameraVelocity.linear.x = - self.cameraVelocity.linear.x
-        self.cameraVelocity.angular.z = - self.cameraVelocity.angular.z
-        self.speedTwistPublisher.publish(self.cameraVelocity)
+        self.speedTwist.linear.x = - self.cameraVelocity.linear.x
+        self.speedTwist.angular.z = - self.cameraVelocity.angular.z
+        self.speedTwistPublisher.publish(self.speedTwist)
 
     def camera_timer_callback(self):
         """

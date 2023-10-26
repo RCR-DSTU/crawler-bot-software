@@ -34,7 +34,7 @@ class RealsenseNode(Node):
         self.profile = self.pipeline.start()
         self.get_logger().info(f"Realsense Node was started...")
 
-        cv2.namedWindow("Realsense Image Window")
+        cv2.namedWindow("Realsense Image Window", cv2.WINDOW_AUTOSIZE)
         self.cvKey = 255
 
     def timer_callback(self):
@@ -77,7 +77,19 @@ class RealsenseNode(Node):
 
             if self.cvKey == ord('1'):
                 # ---
-                image = cv2.putText(color_image,
+                image = color_image
+
+                for p_logo in self.logoFollowerController.logoFollower.possibleLogos:
+                    image = cv2.rectangle(image, p_logo.logoP1,
+                                          p_logo.logoP2,
+                                          (0, 255, 255), 1)
+                    image = cv2.putText(image,
+                                        f"{p_logo.distanceProbability} "
+                                        f"{p_logo.colorProbability}",
+                                        p_logo.logoP1,
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+
+                image = cv2.putText(image,
                                     f"FPS: {int(1.0 / (time.time() - start_time))}",
                                     (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
                 image = cv2.rectangle(image, self.logoFollowerController.logoFollower.followerLogo.logoP1,
