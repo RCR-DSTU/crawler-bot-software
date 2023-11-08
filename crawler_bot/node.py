@@ -150,6 +150,9 @@ class LogoFollowerNode(Node):
                                                   connecting_using_ds4drv=False)
             self.manualTimer.cancel()
             self.modeSwitchFlag = True
+            operating_mode_parameter = Parameter('operating_mode', Parameter.Type.INTEGER, config.DEBUG)
+            self.set_parameters([operating_mode_parameter])
+
 
     def auto_timer_callback(self):
         """

@@ -1,0 +1,7 @@
+realsense:
+  ros__parameters:
+    average_acceleration: 0.2
+crawler_bot:
+  ros__parameters:
+    operating_mode: 1
+    use_camera: true

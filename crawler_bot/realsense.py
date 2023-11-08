@@ -7,7 +7,7 @@ from crawler_bot import config, logo
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import CompressedImage
-from geometry_msgs.msg import Point, Twist
+from geometry_msgs.msg import Twist, Point
 
 
 class RealsenseNode(Node):
@@ -31,7 +31,11 @@ class RealsenseNode(Node):
         self.config.enable_stream(rs.stream.color, config.imageWidth, config.imageHeight, rs.format.bgr8, 30)
         self.config.enable_stream(rs.stream.depth, config.imageWidth, config.imageHeight, rs.format.z16, 30)
 
-        self.profile = self.pipeline.start()
+        try:
+            self.profile = self.pipeline.start()
+        except Exception as e:
+            print("Realsense is disconnected!")
+            raise e
         self.get_logger().info(f"Realsense Node was started...")
 
         cv2.namedWindow("Realsense Image Window", cv2.WINDOW_AUTOSIZE)
@@ -78,7 +82,7 @@ class RealsenseNode(Node):
             if self.cvKey == ord('1'):
                 # ---
                 image = color_image
-
+                image = cv2.resize(image, (1280, 720))
                 for p_logo in self.logoFollowerController.logoFollower.possibleLogos:
                     image = cv2.rectangle(image, p_logo.logoP1,
                                           p_logo.logoP2,

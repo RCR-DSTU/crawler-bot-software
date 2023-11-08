@@ -1,8 +1,8 @@
 from ament_index_python import get_package_prefix
 
 
-imageWidth = int(1280 / 4)
-imageHeight = int(720 / 4)
+imageWidth = int(1280)
+imageHeight = int(720)
 
 
 # Ниже определены 3 режима работы робота:
@@ -15,7 +15,7 @@ AUTO = 2
 # Период таймера в секундах всех РОС2 таймеров (20 раз в секунду)
 TIMER_PERIOD = 0.02  # sec
 # Таймаут для выключения автономного режима, если не поступает изображения с камеры в миллисекундах
-AUTO_MODE_TIMEOUT = 10000  # msec
+AUTO_MODE_TIMEOUT = 30000  # msec
 
 
 #  Максимальные и минимальные значения скоростей для управления роботом
@@ -42,7 +42,7 @@ gamepadInterface = "/dev/input/js0"
 # Картинка для тестирования модуля распознавания
 testImagePath = 'media/StreetPhoto.jpg'
 # Переменная, хранящая текущий режим работы из параметров
-operatingMode = AUTO  # Integer
+operatingMode = MANUAL  # Integer
 # Флаг испльзования камеры
 usingCamera = True  # Boolean
 # Пустая переменная для экземпляра ноды, чтобы можно было использовать ноду из всех скриптов, к которым подлючен
