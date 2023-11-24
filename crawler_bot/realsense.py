@@ -81,34 +81,36 @@ class RealsenseNode(Node):
 
             if self.cvKey == ord('1'):
                 # ---
-                image = color_image
-                image = cv2.resize(image, (1280, 720))
-                for p_logo in self.logoFollowerController.logoFollower.possibleLogos:
-                    image = cv2.rectangle(image, p_logo.logoP1,
-                                          p_logo.logoP2,
-                                          (0, 255, 255), 1)
-                    image = cv2.putText(image,
-                                        f"{p_logo.distanceProbability} "
-                                        f"{p_logo.colorProbability}",
-                                        p_logo.logoP1,
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
-
+                pass
+            image = color_image
+            image = cv2.resize(image, (config.imageWidth, config.imageHeight))
+            for p_logo in self.logoFollowerController.logoFollower.possibleLogos:
+                image = cv2.rectangle(image, p_logo.logoP1,
+                                      p_logo.logoP2,
+                                      (0, 255, 255), 1)
                 image = cv2.putText(image,
-                                    f"FPS: {int(1.0 / (time.time() - start_time))}",
-                                    (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
-                image = cv2.rectangle(image, self.logoFollowerController.logoFollower.followerLogo.logoP1,
-                                      self.logoFollowerController.logoFollower.followerLogo.logoP2,
-                                      (0, 255, 0), 1)
-                image = cv2.putText(image,
-                                    f"{self.logoFollowerController.logoFollower.followerLogo.distanceProbability} "
-                                    f"{self.logoFollowerController.logoFollower.followerLogo.colorProbability}",
-                                    self.logoFollowerController.logoFollower.followerLogo.logoP1,
+                                    f"{p_logo.distanceProbability} "
+                                    f"{p_logo.colorProbability}",
+                                    p_logo.logoP1,
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
 
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                cv2.imshow("Realsense Image Window", image)
-                cv2.waitKey(1)
-                # ---
+            image = cv2.putText(image,
+                                f"FPS: {int(1.0 / (time.time() - start_time))}",
+                                (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+            image = cv2.rectangle(image, self.logoFollowerController.logoFollower.followerLogo.logoP1,
+                                  self.logoFollowerController.logoFollower.followerLogo.logoP2,
+                                  (0, 255, 0), 1)
+            image = cv2.putText(image,
+                                f"{self.logoFollowerController.logoFollower.followerLogo.distanceProbability} "
+                                f"{self.logoFollowerController.logoFollower.followerLogo.colorProbability}",
+                                self.logoFollowerController.logoFollower.followerLogo.logoP1,
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = cv2.resize(image, (640, 320))
+            cv2.imshow("Realsense Image Window", image)
+            cv2.waitKey(1)
+            # ---
         except Exception:
             self.get_logger().warn(f"Realsense Node can not receive or process frames!")
 

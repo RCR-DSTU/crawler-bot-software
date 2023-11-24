@@ -1,8 +1,8 @@
 from ament_index_python import get_package_prefix
 
 
-imageWidth = int(1280)
-imageHeight = int(720)
+imageWidth = int(1280 / 4)
+imageHeight = int(720 / 4)
 
 
 # Ниже определены 3 режима работы робота:
