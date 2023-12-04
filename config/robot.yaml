@@ -1,0 +1,29 @@
+realsense:
+  ros__parameters:
+    image_width: 480
+    image_height: 270
+    print_fps: false
+    frequency: 25
+detector:
+  ros__parameters:
+    detecting_class: person
+    target_x: 240
+    target_z: 1.
+    linear_proportional_term: 1.5
+    angular_proportional_term: 1.0
+    frequency: 25
+controller:
+  ros__parameters:
+    frequency: 25
+robot:
+  ros__parameters:
+    operating_mode: debug
+    auto_mode_timeout: 5
+    manual_mode_timeout: 5
+    frequency: 25
+    debug_linear_velocity: 0.1
+    debug_angular_velocity: 0.1
+    max_linear_velocity: 1.0
+    min_linear_velocity: 0.0
+    max_angular_velocity: 1.0
+    min_angular_velocity: 0.0

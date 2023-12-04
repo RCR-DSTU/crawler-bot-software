@@ -19,20 +19,36 @@ def generate_launch_description():
             default_value=os.path.join(crawler_bot_dir, 'config', 'robot.yaml'),
             description='Full path to the ROS2 parameters file to use for all launched nodes')
 
+    robot_node = Node(
+            package='crawler_bot',
+            executable='robot',
+            parameters=[params_file],)
+
     realsense_node = Node(
             package='crawler_bot',
-            executable='realsense_run',
-            parameters=[params_file],
-            name='realsense')
+            executable='realsense',
+            parameters=[params_file],)
 
-    crawler_bot_node = Node(
+    detector_node = Node(
             package='crawler_bot',
-            executable='crawler_bot_run',
-            parameters=[params_file],
-            name='crawler_bot')
+            executable='detector',
+            parameters=[params_file],)
+
+    controller_node = Node(
+            package='crawler_bot',
+            executable='controller',
+            parameters=[params_file],)
+
+    gui_node = Node(
+            package='crawler_bot',
+            executable='gui',
+            parameters=[params_file],)
 
     ld.add_action(declare_param_file)
     ld.add_action(realsense_node)
-    ld.add_action(crawler_bot_node)
+    ld.add_action(detector_node)
+    ld.add_action(controller_node)
+    ld.add_action(robot_node)
+    ld.add_action(gui_node)
 
     return ld

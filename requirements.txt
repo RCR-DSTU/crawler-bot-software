@@ -7,3 +7,6 @@ tensorflow~=2.12.0
 setuptools~=67.6.0
 ultralytics~=8.0.180
 pyPS4Controller~=1.2.5
+
+launch~=1.0.4
+PyQt5~=5.15.10
